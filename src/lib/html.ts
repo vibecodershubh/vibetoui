@@ -1,5 +1,5 @@
 // Sanitizer for model-generated HTML. The sandboxed iframe is the real security boundary;
-// this keeps generated snippets inert and self-contained (CLAUDE.md: strip scripts + external URLs).
+// this keeps generated snippets inert and self-contained (PRD.md: strip scripts + external URLs).
 //
 // Regex tokenizer, not a full HTML parser, so it is deliberately conservative: it rebuilds every
 // tag from an allow-decision per attribute, and escapes any "<" it could not parse as a complete tag

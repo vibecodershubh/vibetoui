@@ -1,4 +1,4 @@
-# Vibe To UI
+# Vibe To UI: Product Requirements
 AI UI generator (NOT a full website builder). The user gives a rough idea, an
 Interview Agent asks 3-6 high-value questions, a built-in Taste Skill constrains
 generation, and the result renders live. The user can select ONE component,

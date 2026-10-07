@@ -70,7 +70,7 @@ A short walkthrough of the product: [docs/demo.mp4](docs/demo.mp4). To follow al
                                     /api/patch ──► only that section is replaced
 ```
 
-Four principles shape the code (they are also written down in [`CLAUDE.md`](CLAUDE.md)):
+Four principles shape the code (they are also written down in [`PRD.md`](PRD.md)):
 
 1. **Intent before generation.** The generator never receives the user's raw first message. It gets a structured
    brief (goal, audience, what's being built, visual direction, notes, confidence) plus the design tokens.
@@ -353,4 +353,4 @@ src/
 
 ---
 
-*Project principles and conventions for contributors and coding assistants live in [`CLAUDE.md`](CLAUDE.md).*
+*Product requirements, principles and conventions for contributors live in [`PRD.md`](PRD.md).*
