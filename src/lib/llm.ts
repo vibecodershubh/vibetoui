@@ -65,14 +65,14 @@ function toLlmError(err: unknown): LlmError {
 }
 
 /** The real model call. The abort signal cancels the underlying HTTP request. */
-export function createAnthropicComplete(): Complete {
+export function createAnthropicComplete(opts: { model?: string; maxTokens?: number } = {}): Complete {
   const client = new Anthropic();
   return async ({ system, messages, signal }) => {
     try {
       const res = await client.messages.create(
         {
-          model: MODEL(),
-          max_tokens: MAX_TOKENS,
+          model: opts.model || MODEL(),
+          max_tokens: opts.maxTokens ?? MAX_TOKENS,
           // The system prompt is static, so it is a cache candidate (no-op if under the model's minimum).
           system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
           messages,

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { z } from "zod";
-import { DEFAULT_PRESET } from "@/lib/presets";
+import { presetForDirection } from "@/lib/presets";
 import { GeneratedComponentsSchema, type Intent } from "@/lib/schema";
 import { useCanvasStore } from "@/lib/store";
 
@@ -18,35 +18,24 @@ type Status = "idle" | "loading" | "done" | "error";
 interface GenerateState {
   status: Status;
   error: string | null;
-  generate: (idea: string) => Promise<void>;
-}
-
-// TEMPORARY: until the Interview Agent exists, wrap the typed idea in a low-confidence Intent.
-// The server only accepts an intent (never a raw prompt), and confidence 0.3 tells the model not to
-// invent specifics. Replace this with the interview's output.
-function stubIntent(idea: string): Intent {
-  return {
-    goal: idea.trim().slice(0, 1000),
-    audience: "general visitors",
-    targetUi: "landing page",
-    visualDirection: "follow the design system",
-    contentNotes: "",
-    confidence: 0.3,
-  };
+  /** Generate from a (confirmed or skipped-ahead) brief. The visual direction picks the design system. */
+  generate: (intent: Intent) => Promise<void>;
+  reset: () => void;
 }
 
 export const useGenerateStore = create<GenerateState>((set) => ({
   status: "idle",
   error: null,
-  generate: async (idea) => {
+  reset: () => set({ status: "idle", error: null }),
+  generate: async (intent) => {
     set({ status: "loading", error: null });
     try {
-      const intent = stubIntent(idea);
+      const designSystem = presetForDirection(intent.visualDirection).designSystem;
       const { canvas, setCanvas } = useCanvasStore.getState();
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent, designSystem: DEFAULT_PRESET.designSystem, targetType: "landing page" }),
+        body: JSON.stringify({ intent, designSystem, targetType: intent.targetUi.slice(0, 60) || "landing page" }),
       });
       const data = ResponseSchema.parse(await res.json());
       if (!("components" in data)) {
@@ -54,7 +43,7 @@ export const useGenerateStore = create<GenerateState>((set) => ({
         return;
       }
       setCanvas({
-        designSystem: DEFAULT_PRESET.designSystem,
+        designSystem,
         components: data.components.map((c) => ({ ...c, locked: false })),
         metadata: {
           intent,

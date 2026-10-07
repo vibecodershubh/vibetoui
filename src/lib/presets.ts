@@ -108,3 +108,16 @@ export const PRESETS: Preset[] = [
 export const DEFAULT_PRESET = PRESETS[0];
 
 export const getPreset = (id: string): Preset | undefined => PRESETS.find((p) => p.id === id);
+
+const DIRECTION_KEYWORDS: [string, RegExp][] = [
+  ["technical", /technical|developer|dev tool|dark/i],
+  ["soft-friendly", /soft|friendly|warm|playful/i],
+  ["bold-minimal", /bold|minimal|stark/i],
+  ["editorial", /editorial|magazine|serif/i],
+];
+
+/** Map the free-text visual direction from the brief to a preset. Defaults to Editorial. */
+export function presetForDirection(direction: string): Preset {
+  const hit = DIRECTION_KEYWORDS.find(([, re]) => re.test(direction));
+  return (hit && getPreset(hit[0])) || DEFAULT_PRESET;
+}
