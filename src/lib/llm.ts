@@ -64,6 +64,14 @@ export function toLlmError(err: unknown): LlmError {
     }
     if (err.status === 400) return new LlmError(`bad request: ${detail}`, false, "The model API rejected the request.");
     if (err.status === 429) {
+      // "...PerDay..." means the daily quota is gone (free tier is about 20 requests a day): retrying cannot help.
+      if (/PerDay/i.test(detail)) {
+        return new LlmError(
+          "quota exceeded",
+          false,
+          "Gemini's quota for this key is used up. Try again later, use a key with billing enabled, or switch to demo data.",
+        );
+      }
       return new LlmError("rate limited", true, "Rate limited by the API. Wait a moment and try again.");
     }
     return new LlmError(`api ${err.status}: ${detail}`, true, "The model API returned an error.");

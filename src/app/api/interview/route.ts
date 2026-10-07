@@ -1,3 +1,4 @@
+import { demoDelay, isDemoRequest } from "@/lib/demo";
 import {
   InterviewOutputSchema,
   InterviewRequestSchema,
@@ -27,7 +28,8 @@ export async function POST(request: Request) {
   }
   const req = parsed.data;
 
-  if (process.env.DEMO_MODE === "true") {
+  if (isDemoRequest(request)) {
+    await demoDelay("interview");
     return Response.json({ ...finalizeInterview(demoInterview(req), req), demo: true });
   }
 

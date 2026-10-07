@@ -17,7 +17,7 @@ vi.mock("./gemini", async (importOriginal) => ({
 }));
 
 import { ApiError } from "@google/genai";
-import { checkHealth, resetHealthCache } from "./health";
+import { checkConfig, checkHealth, resetHealthCache } from "./health";
 import { LlmError, createGeminiComplete } from "./llm";
 
 const ok = (text = '{"a":1}', finishReason = "STOP") => () => ({ text, candidates: [{ finishReason }] });
@@ -94,17 +94,36 @@ describe("createGeminiComplete", () => {
 
 describe("checkHealth", () => {
   it("makes one trivial call and returns only { ok: true }", async () => {
-    expect(await checkHealth()).toEqual({ ok: true });
+    expect(await checkHealth()).toEqual({ ok: true, deep: true });
     expect(calls.generate).toHaveLength(1);
     expect(calls.generate[0]).toMatchObject({ model: "test-model", config: { maxOutputTokens: expect.any(Number) } });
   });
 
-  it("serves repeated checks from a short cache so it cannot be used to spam the API", async () => {
-    await checkHealth(1_000);
-    await checkHealth(5_000);
+  it("remembers a good answer for 5 minutes and a bad one for 30 seconds, so it cannot burn a small daily quota", async () => {
+    await checkHealth({ now: 1_000 });
+    await checkHealth({ now: 200_000 }); // within 5 minutes: served from memory
     expect(calls.generate).toHaveLength(1);
-    await checkHealth(1_000 + 20_000);
+    await checkHealth({ now: 1_000 + 301_000 });
     expect(calls.generate).toHaveLength(2);
+
+    resetHealthCache();
+    calls.generate.length = 0;
+    calls.respond = () => {
+      throw new ApiError({ message: "nope", status: 503 });
+    };
+    await checkHealth({ now: 1_000 });
+    await checkHealth({ now: 20_000 }); // a failure is remembered for 30s
+    expect(calls.generate).toHaveLength(1);
+    await checkHealth({ now: 40_000 });
+    expect(calls.generate).toHaveLength(2);
+  });
+
+  it("the config check makes no model call at all", () => {
+    expect(checkConfig()).toEqual({ ok: true, deep: false });
+    delete process.env.GEMINI_MODEL;
+    expect(checkConfig()).toMatchObject({ ok: false, reason: "missing_config" });
+    expect(checkConfig({ demo: true })).toEqual({ ok: true, demo: true });
+    expect(calls.generate).toHaveLength(0);
   });
 
   it("reports a missing variable without calling Gemini, naming only the variable", async () => {
@@ -132,6 +151,8 @@ describe("checkHealth", () => {
   it("answers ok in DEMO_MODE without calling Gemini", async () => {
     process.env.DEMO_MODE = "true";
     expect(await checkHealth()).toEqual({ ok: true, demo: true });
+    delete process.env.DEMO_MODE;
+    expect(await checkHealth({ demo: true })).toEqual({ ok: true, demo: true }); // the per-request switch
     expect(calls.generate).toHaveLength(0);
   });
 });

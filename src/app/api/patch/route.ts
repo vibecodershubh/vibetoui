@@ -1,3 +1,4 @@
+import { demoDelay, findSavedPatch, isDemoRequest } from "@/lib/demo";
 import { missingGeminiConfig } from "@/lib/gemini";
 import { createGeminiComplete, generateValidated } from "@/lib/llm";
 import {
@@ -54,7 +55,10 @@ export async function POST(request: Request) {
   };
   const unchanged = (error: string) => Response.json({ component: target satisfies Component, discarded: [], fallback: true, error });
 
-  if (process.env.DEMO_MODE === "true") return respond(demoPatch(target, edit), { demo: true });
+  if (isDemoRequest(request)) {
+    await demoDelay("patch");
+    return respond(demoPatch(target, edit, findSavedPatch(target, edit)), { demo: true });
+  }
 
   const missing = missingGeminiConfig();
   if (missing) {

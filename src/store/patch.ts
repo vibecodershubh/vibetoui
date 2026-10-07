@@ -1,6 +1,8 @@
 import { create } from "zustand";
+import { TIMEOUTS, TimeoutError, requestJson } from "@/lib/http";
 import { PatchResponseSchema } from "@/lib/patch";
 import { useCanvasStore } from "@/lib/store";
+import { useHealthStore } from "./health";
 
 interface PatchState {
   status: "idle" | "loading";
@@ -34,17 +36,13 @@ export const usePatchStore = create<PatchState>((set, get) => ({
 
     set({ status: "loading", error: null });
     try {
-      const res = await fetch("/api/patch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          componentId,
-          request: text,
-          designSystem: canvas.designSystem,
-          components: canvas.components,
+      const data = PatchResponseSchema.parse(
+        await requestJson("/api/patch", {
+          body: { componentId, request: text, designSystem: canvas.designSystem, components: canvas.components },
+          timeoutMs: TIMEOUTS.patch,
         }),
-      });
-      const data = PatchResponseSchema.parse(await res.json());
+      );
+      if ("component" in data && !data.demo) useHealthStore.getState().report(!data.fallback, data.error);
       if (!("component" in data) || data.fallback) {
         set({ status: "idle", error: ("error" in data && data.error) || "Couldn't apply that edit, try again." });
         return false;
@@ -62,8 +60,15 @@ export const usePatchStore = create<PatchState>((set, get) => ({
       }
       set({ status: "idle" });
       return true;
-    } catch {
-      set({ status: "idle", error: "Couldn't reach the server. Is `npm run dev` running?" });
+    } catch (err) {
+      useHealthStore.getState().report(false, err instanceof TimeoutError ? "The request timed out." : "Can't reach the server.");
+      set({
+        status: "idle",
+        error:
+          err instanceof TimeoutError
+            ? "That edit took too long. Try again, or switch to demo data."
+            : "Couldn't reach the server. Is `npm run dev` running?",
+      });
       return false;
     }
   },

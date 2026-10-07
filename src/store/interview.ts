@@ -8,9 +8,11 @@ import {
   countQuestions,
   type ChatMessage,
 } from "@/lib/interview";
+import { TIMEOUTS, TimeoutError, requestJson } from "@/lib/http";
 import { presetForDirection } from "@/lib/presets";
 import type { Intent } from "@/lib/schema";
 import { useGenerateStore } from "./generate";
+import { useHealthStore } from "./health";
 import { useStudioStore } from "./studio";
 
 /** The brief's visual direction decides the studio's direction preset (top bar and the next generation). */
@@ -53,14 +55,12 @@ export const useInterviewStore = create<InterviewState>((set, get) => {
   async function turn(messages: ChatMessage[], intent: Intent) {
     set({ phase: "thinking", messages, notice: null });
     try {
-      const res = await fetch("/api/interview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, intent }),
-      });
-      const parsed = InterviewResponseSchema.safeParse(await res.json());
+      const parsed = InterviewResponseSchema.safeParse(
+        await requestJson("/api/interview", { body: { messages, intent }, timeoutMs: TIMEOUTS.interview }),
+      );
       if (!parsed.success) throw new Error("bad response");
       const r = parsed.data;
+      if (!r.demo) useHealthStore.getState().report(!r.fallback, r.error);
       syncDirection(r.intent.visualDirection);
 
       if (r.nextQuestion) {
@@ -80,9 +80,17 @@ export const useInterviewStore = create<InterviewState>((set, get) => {
           notice: r.fallback ? (r.error ?? "The interviewer is unavailable.") : null,
         });
       }
-    } catch {
+    } catch (err) {
+      useHealthStore.getState().report(false, err instanceof TimeoutError ? "The request timed out." : "Can't reach the server.");
       // Never leave the user stuck: fall through to the summary with the brief we have.
-      set({ phase: "summary", options: [], notice: "Couldn't reach the interviewer, so we'll go with what we have." });
+      set({
+        phase: "summary",
+        options: [],
+        notice:
+          err instanceof TimeoutError
+            ? "The interviewer took too long, so we'll go with what we have."
+            : "Couldn't reach the interviewer, so we'll go with what we have.",
+      });
     }
   }
 

@@ -1,4 +1,4 @@
-import { loadDemo } from "@/lib/demo";
+import { demoDelay, isDemoRequest, loadDemo } from "@/lib/demo";
 import { fallbackComponents } from "@/lib/fallback";
 import { sanitizeHtml } from "@/lib/html";
 import { missingGeminiConfig } from "@/lib/gemini";
@@ -25,9 +25,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid request: expected { intent, designSystem, targetType }." }, { status: 400 });
   }
 
-  if (process.env.DEMO_MODE === "true") {
+  if (isDemoRequest(request)) {
+    await demoDelay("generate");
     try {
-      return Response.json({ components: clean(loadDemo(parsed.data.targetType)), demo: true });
+      return Response.json({ components: clean(loadDemo(parsed.data.targetType, parsed.data.intent.goal)), demo: true });
     } catch (err) {
       console.error("[generate] demo output failed validation:", err);
       return Response.json({ components: fallbackComponents(), fallback: true, error: "Demo data is invalid." });

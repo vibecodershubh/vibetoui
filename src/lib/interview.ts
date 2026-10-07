@@ -199,14 +199,23 @@ export function fallbackInterview(req: InterviewRequest, error: string): Intervi
 
 // ---------- DEMO_MODE: a scripted interview, no model involved ----------
 
+/**
+ * "A hero for an enterprise AI security product" -> "an enterprise AI security product", so the summary card reads
+ * "Landing page for an enterprise AI security product". Other ideas are kept as typed.
+ */
+export function demoGoal(idea: string): string {
+  const m = idea.trim().match(/^(?:an?\s+)?(?:hero|landing page|pricing (?:block|page)|dashboard(?: sidebar)?|page|site|section)\b.*?\bfor\s+(.+)$/i);
+  return m ? m[1].trim() : idea.trim();
+}
+
 export function demoInterview(req: InterviewRequest): InterviewOutput {
   const last = req.messages[req.messages.length - 1].content;
   switch (countQuestions(req.messages)) {
     case 0:
       return {
         nextQuestion: "Who is this mainly for?",
-        options: ["Developers", "Small businesses", "Enterprise buyers", "Everyday consumers"],
-        intentUpdate: { goal: last },
+        options: ["CISOs and security teams", "Developers", "Small businesses", "Everyday consumers"],
+        intentUpdate: { goal: demoGoal(last) },
         confidence: 0.25,
       };
     case 1:

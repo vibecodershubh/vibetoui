@@ -142,8 +142,12 @@ Return the JSON object for this component now.`;
 const escapeHtml = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-/** Deterministic stand-in for the model: appends a visible "Edited" line inside the component. */
-export function demoPatch(original: Component, request: string): PatchOutput {
+/**
+ * Deterministic stand-in for the model. With a saved result (see demo.ts) it returns that; otherwise it appends
+ * a visible "Edited" line inside the component.
+ */
+export function demoPatch(original: Component, request: string, saved?: GeneratedComponent): PatchOutput {
+  if (saved) return { replacement: { ...saved, id: original.id, type: original.type }, discardedIds: [] };
   const note = `<p class="mx-auto max-w-6xl px-s4 pb-s3 text-sm text-muted">Edited: &ldquo;${escapeHtml(request)}&rdquo;</p>`;
   const closing = /(<\/[a-z0-9]+>)\s*$/i;
   const html = closing.test(original.html) ? original.html.replace(closing, (_, close: string) => note + close) : original.html + note;
