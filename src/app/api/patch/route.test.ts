@@ -5,7 +5,7 @@ import { seedCanvas } from "@/lib/seed";
 const modelCalls = vi.hoisted(() => ({ n: 0 }));
 vi.mock("@/lib/llm", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/llm")>()),
-  createAnthropicComplete: () => {
+  createGeminiComplete: () => {
     modelCalls.n++;
     return async () => ({ text: "[]", truncated: false });
   },
@@ -38,7 +38,8 @@ afterEach(() => {
 describe("POST /api/patch", () => {
   it("rejects a locked section with 409 before any model call", async () => {
     process.env.DEMO_MODE = "false";
-    process.env.ANTHROPIC_API_KEY = "sk-test";
+    process.env.GEMINI_API_KEY = "test-key-not-real";
+    process.env.GEMINI_MODEL = "test-model";
     const components = seedCanvas.components.map((c) => (c.id === "hero-1" ? { ...c, locked: true } : c));
     const res = await POST(body({ components }));
     expect(res.status).toBe(409);
@@ -58,7 +59,7 @@ describe("POST /api/patch", () => {
 
   it("returns the original component with fallback when there is no API key", async () => {
     process.env.DEMO_MODE = "false";
-    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.GEMINI_API_KEY;
     const json = await (await POST(body())).json();
     expect(json.fallback).toBe(true);
     expect(json.component.html).toBe(seedCanvas.components[1].html);

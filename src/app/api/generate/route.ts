@@ -1,7 +1,8 @@
 import { loadDemo } from "@/lib/demo";
 import { fallbackComponents } from "@/lib/fallback";
 import { sanitizeHtml } from "@/lib/html";
-import { createAnthropicComplete, generateValidated } from "@/lib/llm";
+import { missingGeminiConfig } from "@/lib/gemini";
+import { createGeminiComplete, generateValidated } from "@/lib/llm";
 import { buildGenerationPrompt } from "@/lib/prompt";
 import { GenerateRequestSchema, GeneratedComponentsSchema, type GeneratedComponent } from "@/lib/schema";
 
@@ -33,18 +34,15 @@ export async function POST(request: Request) {
     }
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("[generate] ANTHROPIC_API_KEY is not set");
-    return Response.json({
-      components: fallbackComponents(),
-      fallback: true,
-      error: "ANTHROPIC_API_KEY is not set. Add it to .env.local or set DEMO_MODE=true.",
-    });
+  const missing = missingGeminiConfig();
+  if (missing) {
+    console.error(`[generate] ${missing}`);
+    return Response.json({ components: fallbackComponents(), fallback: true, error: missing });
   }
 
   const { system, user } = buildGenerationPrompt(parsed.data);
   const result = await generateValidated({
-    complete: createAnthropicComplete(),
+    complete: createGeminiComplete(),
     system,
     user,
     schema: GeneratedComponentsSchema,

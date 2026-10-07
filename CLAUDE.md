@@ -14,8 +14,10 @@ selection.
 - Real UI: preview is sandboxed HTML/Tailwind in an iframe.
 
 ## Stack
-Next.js (App Router) + TypeScript + Tailwind, Zustand, Zod, @anthropic-ai/sdk.
-Model name comes from env ANTHROPIC_MODEL. API key only in server routes.
+Next.js (App Router) + TypeScript + Tailwind, Zustand, Zod, @google/genai (Gemini).
+LLM provider is Gemini: the key comes from env GEMINI_API_KEY and the model name from env GEMINI_MODEL
+(optional GEMINI_INTERVIEW_MODEL). Both are read only in lib/gemini.ts, which is server-only; never
+print, log or hardcode them, and never read .env.local in tooling.
 
 ## Hackathon rules
 - Always keep the app runnable and deployable. Small commits.

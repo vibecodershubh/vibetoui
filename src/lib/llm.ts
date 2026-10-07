@@ -1,5 +1,6 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { ApiError } from "@google/genai";
 import type { z } from "zod";
+import { GeminiConfigError, getAi, getModel, outputTokenBudget, redactSecrets } from "./gemini";
 import { parseModelJson } from "./json";
 
 export interface LlmMessage {
@@ -9,7 +10,7 @@ export interface LlmMessage {
 
 export interface Completion {
   text: string;
-  /** True when the model stopped because it hit max_tokens (output is incomplete). */
+  /** True when the model stopped because it hit the output-token limit (output is incomplete). */
   truncated: boolean;
 }
 
@@ -42,47 +43,69 @@ class OutputError extends Error {
   }
 }
 
-const MODEL = () => process.env.ANTHROPIC_MODEL || "claude-opus-5-5";
-const MAX_TOKENS = 16_000;
+const MAX_OUTPUT_TOKENS = 32_768;
 export const DEFAULT_TIMEOUT_MS = 25_000;
 const MAX_ECHO_CHARS = 20_000;
+/** Gemini finish reasons that mean the model refused or the content was blocked. */
+const BLOCKED = new Set(["SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT", "SPII", "IMAGE_SAFETY"]);
 
-function toLlmError(err: unknown): LlmError {
+/** Maps any failure from the Gemini SDK to an LlmError. Messages are redacted: they may be logged. */
+export function toLlmError(err: unknown): LlmError {
   if (err instanceof LlmError) return err;
-  if (err instanceof Anthropic.AuthenticationError)
-    return new LlmError("auth", false, "The API key was rejected. Check ANTHROPIC_API_KEY.");
-  if (err instanceof Anthropic.NotFoundError)
-    return new LlmError("model not found", false, `Model "${MODEL()}" was not found. Check ANTHROPIC_MODEL.`);
-  if (err instanceof Anthropic.BadRequestError)
-    return new LlmError(`bad request: ${err.message}`, false, "The model API rejected the request.");
-  if (err instanceof Anthropic.RateLimitError)
-    return new LlmError("rate limited", true, "Rate limited by the API. Wait a moment and try again.");
-  if (err instanceof Anthropic.APIConnectionError)
-    return new LlmError(`connection: ${err.message}`, true, "Couldn't reach the Anthropic API.");
-  if (err instanceof Anthropic.APIError)
-    return new LlmError(`api ${err.status}: ${err.message}`, true, "The model API returned an error.");
-  return new LlmError(err instanceof Error ? err.message : String(err), true, "Something went wrong calling the model.");
+  if (err instanceof GeminiConfigError) return new LlmError(err.message, false, err.message);
+  if (err instanceof ApiError) {
+    const detail = redactSecrets(err.message ?? "");
+    // Gemini reports a bad key as 400 INVALID_ARGUMENT ("API key not valid"), as well as 401/403.
+    if (err.status === 401 || err.status === 403 || (err.status === 400 && /api[_ ]key/i.test(detail))) {
+      return new LlmError(`auth (${err.status})`, false, "The Gemini API key was rejected. Check GEMINI_API_KEY.");
+    }
+    if (err.status === 404) {
+      return new LlmError("model not found", false, "The Gemini model was not found. Check GEMINI_MODEL.");
+    }
+    if (err.status === 400) return new LlmError(`bad request: ${detail}`, false, "The model API rejected the request.");
+    if (err.status === 429) {
+      return new LlmError("rate limited", true, "Rate limited by the API. Wait a moment and try again.");
+    }
+    return new LlmError(`api ${err.status}: ${detail}`, true, "The model API returned an error.");
+  }
+  if (err instanceof Error && err.name === "AbortError") {
+    return new LlmError("aborted", true, "The model took too long to respond.");
+  }
+  const detail = redactSecrets(err instanceof Error ? err.message : String(err));
+  return new LlmError(detail, true, "Couldn't reach the Gemini API.");
 }
 
-/** The real model call. The abort signal cancels the underlying HTTP request. */
-export function createAnthropicComplete(opts: { model?: string; maxTokens?: number } = {}): Complete {
-  const client = new Anthropic();
+/**
+ * The real model call: `ai.models.generateContent({ model, contents, config })`.
+ * - config.systemInstruction carries the taste skill and system rules.
+ * - config.responseMimeType = "application/json" for calls that expect JSON (the default; every route does).
+ * - config.abortSignal cancels the request when the timeout fires.
+ */
+export function createGeminiComplete(
+  opts: { model?: string; maxOutputTokens?: number; json?: boolean } = {},
+): Complete {
   return async ({ system, messages, signal }) => {
     try {
-      const res = await client.messages.create(
-        {
-          model: opts.model || MODEL(),
-          max_tokens: opts.maxTokens ?? MAX_TOKENS,
-          // The system prompt is static, so it is a cache candidate (no-op if under the model's minimum).
-          system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
-          messages,
+      const ai = getAi();
+      const model = opts.model || getModel();
+      const response = await ai.models.generateContent({
+        model,
+        contents: messages.map((m) => ({
+          role: m.role === "assistant" ? "model" : "user",
+          parts: [{ text: m.content }],
+        })),
+        config: {
+          systemInstruction: system,
+          maxOutputTokens: await outputTokenBudget(model, opts.maxOutputTokens ?? MAX_OUTPUT_TOKENS),
+          abortSignal: signal,
+          ...(opts.json === false ? {} : { responseMimeType: "application/json" }),
         },
-        { signal, maxRetries: 0 },
-      );
-      if (res.stop_reason === "refusal")
-        throw new LlmError("refusal", false, "The model declined this request.");
-      const text = res.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-      return { text, truncated: res.stop_reason === "max_tokens" };
+      });
+      const reason = response.candidates?.[0]?.finishReason;
+      if (response.promptFeedback?.blockReason || (reason && BLOCKED.has(String(reason)))) {
+        throw new LlmError("blocked", false, "The model declined this request.");
+      }
+      return { text: response.text ?? "", truncated: reason === "MAX_TOKENS" };
     } catch (err) {
       throw toLlmError(err);
     }
@@ -167,7 +190,7 @@ export async function generateValidated<T>(opts: GenerateOptions<T>): Promise<Ge
       return { data: result.data, fallback: false };
     } catch (err) {
       const failure = err instanceof OutputError ? err : toLlmError(err);
-      console.error(`[llm:${opts.label}] attempt ${attempt}/${maxAttempts} failed: ${failure.message}`);
+      console.error(`[llm:${opts.label}] attempt ${attempt}/${maxAttempts} failed: ${redactSecrets(failure.message)}`);
 
       if (failure instanceof LlmError) {
         lastUserMessage = failure.userMessage;
