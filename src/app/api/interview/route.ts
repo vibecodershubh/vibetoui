@@ -7,7 +7,8 @@ import {
   fallbackInterview,
   finalizeInterview,
 } from "@/lib/interview";
-import { createAnthropicComplete, generateValidated } from "@/lib/llm";
+import { missingGeminiConfig } from "@/lib/gemini";
+import { createGeminiComplete, generateValidated } from "@/lib/llm";
 
 export const maxDuration = 60;
 
@@ -30,16 +31,15 @@ export async function POST(request: Request) {
     return Response.json({ ...finalizeInterview(demoInterview(req), req), demo: true });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("[interview] ANTHROPIC_API_KEY is not set");
-    return Response.json(
-      fallbackInterview(req, "ANTHROPIC_API_KEY is not set. Add it to .env.local or set DEMO_MODE=true."),
-    );
+  const missing = missingGeminiConfig();
+  if (missing) {
+    console.error(`[interview] ${missing}`);
+    return Response.json(fallbackInterview(req, missing));
   }
 
   const result = await generateValidated({
     // The interview is a small, latency-sensitive call: allow a faster model than generation.
-    complete: createAnthropicComplete({ model: process.env.ANTHROPIC_INTERVIEW_MODEL || undefined, maxTokens: 2000 }),
+    complete: createGeminiComplete({ model: process.env.GEMINI_INTERVIEW_MODEL || undefined, maxOutputTokens: 8192 }),
     system: INTERVIEW_SYSTEM,
     user: buildInterviewPrompt(req),
     schema: InterviewOutputSchema,
