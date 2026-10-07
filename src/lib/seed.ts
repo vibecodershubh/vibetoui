@@ -14,7 +14,7 @@ export const seedCanvas: Canvas = {
       locked: false,
       props: {},
       html: `<header class="border-b border-line bg-bg">
-  <div class="mx-auto flex max-w-6xl items-center justify-between px-s4 py-s3">
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-s3 px-s4 py-s3">
     <a href="#" class="font-heading text-lg font-semibold text-ink">Brewline</a>
     <nav class="flex gap-s4 text-sm text-muted"><a href="#" class="transition hover:text-ink">Lots</a><a href="#" class="transition hover:text-ink">Subscriptions</a><a href="#" class="transition hover:text-ink">Farms</a></nav>
   </div>

@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
+/* Studio chrome tokens. The generated page has its own tokens (see lib/theme.ts); these style only the app.
+   ONE accent hue: selection, primary buttons and focus, nothing else. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --paper: #FAF8F5;
+  --panel: #FFFFFF;
+  --ink: #1C1917;
+  --stone: #78716C;
+  --line: #E7E2DA;
+  --accent: #4338CA;
+  --accent-fill: #4338CA;
+  --on-accent: #FFFFFF;
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
+  --float-shadow: 0 10px 28px rgba(28, 25, 23, 0.1), 0 1px 3px rgba(28, 25, 23, 0.08);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #171513;
+  --panel: #1D1A17;
+  --ink: #F2EEE8;
+  --stone: #A39E97;
+  --line: #2C2824;
+  --accent: #8E94F5;
+  --accent-fill: #4338CA;
+  --on-accent: #FFFFFF;
+  --float-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-panel: var(--panel);
+  --color-ink: var(--ink);
+  --color-stone: var(--stone);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fill: var(--accent-fill);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, serif;
+  --radius-control: 10px;
+  --radius-card: 12px;
+  --shadow-float: var(--float-shadow);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--paper);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Visible focus on every interactive element, in both themes. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  transition-property: none; /* the ring appears instantly instead of fading in from the default color */
+}
+
+/* While the theme flips, nothing animates: every color changes in the same frame. */
+:root[data-switching] *,
+:root[data-switching] *::before,
+:root[data-switching] *::after {
+  transition: none !important;
+}
+
+/* Soft dotted grid behind the canvas. An SVG pattern (not a gradient), one per theme. */
+.canvas-backdrop {
+  background-color: var(--paper);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='1.5' cy='1.5' r='1.1' fill='%23D9D3C9'/%3E%3C/svg%3E");
+  background-size: 22px 22px;
+}
+:root[data-theme="dark"] .canvas-backdrop {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='1.5' cy='1.5' r='1.1' fill='%23332E2A'/%3E%3C/svg%3E");
+}
+
+/* Loading skeleton. The shimmer's highlight is the ONLY gradient in the app (loading state only). */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--line);
+  border-radius: var(--radius-control);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--panel) 65%, transparent), transparent);
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton::after {
+    display: none;
+  }
 }

@@ -13,7 +13,11 @@ export function fontsHref(ds: DesignSystem): string {
 /** The design system as CSS variables on :root. Values are schema-validated before they get here. */
 export function designSystemCss(ds: DesignSystem): string {
   const { color: c, typography: t, spacing: s, radius: r, motion: m } = ds;
+  // Native UI inside the page (scrollbars, form controls) should match a dark page.
+  const [red, green, blue] = [1, 3, 5].map((i) => parseInt(c.bg.slice(i, i + 2), 16));
+  const colorScheme = (0.299 * red + 0.587 * green + 0.114 * blue) / 255 < 0.45 ? "dark" : "light";
   const vars = [
+    `color-scheme:${colorScheme}`,
     `--bg:${c.bg}`,
     `--surface:${c.surface}`,
     `--ink:${c.ink}`,
