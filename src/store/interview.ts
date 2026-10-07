@@ -8,8 +8,15 @@ import {
   countQuestions,
   type ChatMessage,
 } from "@/lib/interview";
+import { presetForDirection } from "@/lib/presets";
 import type { Intent } from "@/lib/schema";
 import { useGenerateStore } from "./generate";
+import { useStudioStore } from "./studio";
+
+/** The brief's visual direction decides the studio's direction preset (top bar and the next generation). */
+function syncDirection(direction: string) {
+  if (direction.trim()) useStudioStore.getState().setPreset(presetForDirection(direction).id);
+}
 
 type Phase = "idle" | "thinking" | "asking" | "summary" | "generating" | "done";
 
@@ -54,6 +61,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => {
       const parsed = InterviewResponseSchema.safeParse(await res.json());
       if (!parsed.success) throw new Error("bad response");
       const r = parsed.data;
+      syncDirection(r.intent.visualDirection);
 
       if (r.nextQuestion) {
         set({
@@ -108,7 +116,10 @@ export const useInterviewStore = create<InterviewState>((set, get) => {
       await turn([...messages, { role: "user", content: answer.slice(0, 1000) }], intent);
     },
 
-    updateIntent: (patch) => set((s) => ({ intent: { ...s.intent, ...patch } })),
+    updateIntent: (patch) => {
+      if (patch.visualDirection !== undefined) syncDirection(patch.visualDirection);
+      set((s) => ({ intent: { ...s.intent, ...patch } }));
+    },
 
     confirm: async () => {
       if (get().phase !== "summary") return;

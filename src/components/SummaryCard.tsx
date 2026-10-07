@@ -4,8 +4,10 @@ import { useState } from "react";
 import { PRESETS, presetForDirection } from "@/lib/presets";
 import type { Intent } from "@/lib/schema";
 import { useInterviewStore } from "@/store/interview";
+import { primaryButton } from "./studio/EmptyState";
+import { secondaryButton } from "./studio/Popover";
 
-/** One friendly sentence: "Hero for enterprise AI security, audience: CISOs, goal: book a demo, direction: Editorial". */
+/** One friendly sentence: "Hero for enterprise AI security, audience: CISOs, direction: Editorial". */
 export function summarize(i: Intent): string {
   const what = i.targetUi || "Landing page";
   const parts = [`${what} for ${i.goal || "your idea"}`];
@@ -23,7 +25,7 @@ const FIELD_LABELS: { key: "goal" | "audience" | "targetUi" | "contentNotes"; la
 ];
 
 const inputClass =
-  "w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 outline-none focus:border-zinc-900";
+  "w-full rounded-control border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-stone";
 
 export function SummaryCard() {
   const intent = useInterviewStore((s) => s.intent);
@@ -32,14 +34,14 @@ export function SummaryCard() {
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-900">
-      <p className="font-medium">Here&apos;s what I understood</p>
-      {notice && <p className="mt-1 text-xs text-amber-700">{notice}</p>}
+    <div className="rounded-card border border-line bg-panel p-4 text-sm text-ink">
+      <h3 className="font-serif text-xl">Here&apos;s what I understood</h3>
+      {notice && <p className="mt-1 text-xs text-stone">{notice}</p>}
 
       {editing ? (
-        <div className="mt-2 grid gap-2">
+        <div className="mt-3 grid gap-3">
           {FIELD_LABELS.map(({ key, label }) => (
-            <label key={key} className="grid gap-1 text-xs text-zinc-600">
+            <label key={key} className="grid gap-1 text-xs text-stone">
               {label}
               <input
                 className={inputClass}
@@ -49,7 +51,7 @@ export function SummaryCard() {
               />
             </label>
           ))}
-          <label className="grid gap-1 text-xs text-zinc-600">
+          <label className="grid gap-1 text-xs text-stone">
             Direction
             <select
               className={inputClass}
@@ -63,18 +65,15 @@ export function SummaryCard() {
           </label>
         </div>
       ) : (
-        <p className="mt-1 leading-relaxed text-zinc-700">{summarize(intent)}</p>
+        <p className="mt-2 leading-relaxed text-stone">{summarize(intent)}</p>
       )}
 
-      <div className="mt-3 flex gap-2">
-        <button
-          onClick={() => (editing ? setEditing(false) : confirm())}
-          className="rounded-md bg-zinc-900 px-3 py-1.5 font-medium text-white"
-        >
+      <div className="mt-4 flex gap-2">
+        <button type="button" onClick={() => (editing ? setEditing(false) : confirm())} className={primaryButton}>
           {editing ? "Done editing" : "Confirm"}
         </button>
         {!editing && (
-          <button onClick={() => setEditing(true)} className="rounded-md border border-zinc-300 px-3 py-1.5">
+          <button type="button" onClick={() => setEditing(true)} className={secondaryButton}>
             Edit
           </button>
         )}

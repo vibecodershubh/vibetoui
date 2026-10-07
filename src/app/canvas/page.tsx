@@ -23,7 +23,7 @@ export default function CanvasTestPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 gap-6 px-4 py-8">
-      <CanvasFrame className="h-[80vh] flex-1" />
+      <CanvasFrame className="h-[80vh] flex-1 overflow-hidden rounded-lg border border-zinc-200" />
 
       <aside className="flex w-64 shrink-0 flex-col gap-4 text-sm">
         <h1 className="text-lg font-semibold">Canvas test</h1>
