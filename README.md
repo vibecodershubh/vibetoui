@@ -49,10 +49,11 @@ A short walkthrough of the product: [docs/demo.mp4](docs/demo.mp4). To follow al
 | **Guided intake** | 3 to 6 high-value questions, one at a time, as tap-to-answer chips (plus "Something else"). It only asks what would materially change the design, and stops at high confidence or after 6 questions. A progress bar shows how clear the brief is. |
 | **Tasteful generation** | A built-in taste system (typography, spacing rhythm, restrained color with one accent, motion only for state, explicit anti-slop rules) plus four **direction presets**: Editorial, Technical, Soft & Friendly, Bold Minimal. |
 | **Scoped edits** | Select one section and describe a change. The model sees only that section. The server replaces only that section and refuses locked ones. |
-| **Lock, duplicate, undo** | A floating toolbar on the selected section: Lock/Unlock, Duplicate, Undo (with a count), and the edit command box. |
-| **Live preview** | A real HTML/Tailwind page in a sandboxed iframe, with a Desktop / Tablet / Mobile switcher, a light and a dark app theme, and a "what changed" flash on edited sections. |
-| **Design panel** | Switch direction, change corner radius (Sharp / Soft / Round) and density (Compact / Comfortable / Spacious), see the palette and fonts, and read the section's code. All undoable. |
-| **Export** | Download or copy a standalone HTML file (Tailwind from a CDN, fonts, and the design tokens included). |
+| **Lock, duplicate, undo** | A floating toolbar on the selected section: Lock/Unlock, Duplicate, Undo (with a count), and the edit command box. **Cmd/Ctrl+Z** undoes from anywhere, including inside the preview. |
+| **Version history** | Every change is a timestamped, labeled version. A **History** drawer lists them with one-click **Restore**. Restoring never loses anything: the state you leave is kept, so a restore can itself be undone. |
+| **Live preview** | A real HTML/Tailwind page in a sandboxed iframe, with a Desktop (1280px) / Tablet (820px) / Mobile (390px) switcher that lays the page out at the real width and scales it to fit, a light and a dark app theme, and a "what changed" flash on edited sections. |
+| **Design panel** | Switch direction, change corner radius (Sharp / Soft / Round) and density (Compact / Comfortable / Spacious), see the palette and fonts, and read the section's code with syntax highlighting. All undoable. |
+| **Export** | Download `index.html` or copy it: a clean, indented standalone page (Tailwind from a CDN, fonts, and the design tokens included), with no editor attributes or code. |
 | **Built to survive a demo** | Demo mode with a saved end-to-end flow, one-click fallback when the API fails, request timeouts everywhere, an error boundary around the preview, and a quiet API status indicator. |
 
 ---
@@ -173,7 +174,7 @@ Works in demo mode (identical every time) or live (the questions and HTML will d
 6. **Lock it.** Press **Lock**. The hero shows a *Locked* badge and its input is disabled.
 7. **Edit the next section.** Click the features section, type `make the feature section calmer and shorter`, press
    **Apply**. It becomes a numbered list. The locked hero is unchanged, byte for byte.
-8. **Extras:** Tablet/Mobile switcher, Light/Dark, the **Code** tab, **Direction**, **Undo**, **Export**.
+8. **Extras:** Tablet/Mobile switcher, Light/Dark, the **Code** tab, **Direction**, **Undo** or **Cmd/Ctrl+Z**, the **History** drawer (restore the first version), **Export**.
 
 Reset between runs with **Start over** or by reloading.
 
@@ -187,12 +188,14 @@ Reset between runs with **Start over** or by reloading.
 - **Floating toolbar** (on the selected section): *Editing: Hero*, **Lock/Unlock**, **Duplicate**, **Undo (n)**, and the
   edit box. A locked section's box is disabled and the server also refuses it.
 - **Right: Design and Code.** *Design*: direction presets, corner radius, density, palette and fonts. *Code*: the
-  selected section's HTML (or the whole page), with **Copy**.
-- **Top bar:** direction menu, device switcher, light/dark theme, **Export**, and the panel toggle.
+  selected section's HTML (or the whole page), pretty-printed and syntax-highlighted, with **Copy**.
+- **Top bar:** direction menu, device switcher, light/dark theme, **Export**, **History**, and the panel toggle.
+- **History drawer:** newest first, each version with its time and a **Restore** button. The top entry is the current version.
 - **Keyboard:** everything is reachable by Tab; menus open with Enter and close with Esc; segmented controls use the
-  arrow keys; a "Skip to canvas" link appears on first Tab.
-- **Export** downloads `vibe-to-ui.html`, a standalone page that loads Tailwind (CDN) and Google Fonts and defines the
-  design tokens. It contains only the page, no editor code.
+  arrow keys; a "Skip to canvas" link appears on first Tab. **Cmd/Ctrl+Z** undoes the last change (it leaves text fields alone, so typing still undoes normally).
+- **Export** downloads `index.html`: a readable, indented standalone page that loads Tailwind (CDN) and Google Fonts and
+  defines the design tokens (one CSS variable per line). It contains only the page: no `data-vui-*` attributes, no editor
+  code, no scripts from the content.
 
 ---
 
@@ -347,8 +350,7 @@ src/
 - **No persistence.** The page lives in the browser's memory. Refreshing loses it (use **Export**).
 - **Output quality depends on the model** and on your key's quota. Free tiers are small; use demo mode as a safety net.
 - **The preview and the export load Tailwind (CDN) and Google Fonts**, so they need internet access.
-- **Not yet included (in progress):** a version-history drawer with one-click restore and Cmd/Ctrl+Z,
-  syntax-highlighted code, and device widths of 1280/820/390 with scale-to-fit. For now, use the toolbar's **Undo**.
+- **History is per session.** Versions (up to 50) live in memory with the page and are lost on refresh. There is no redo yet.
 - **No license file yet.** Add one before sharing the code publicly.
 
 ---

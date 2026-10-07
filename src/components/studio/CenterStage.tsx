@@ -40,7 +40,11 @@ export function CenterStage({ className = "" }: { className?: string }) {
       )}
       {(stage === "generating" || stage === "ready") && (
         <CanvasBoundary>
-          <DeviceFrame>{stage === "generating" ? <PageSkeleton /> : <CanvasFrame className="h-full" />}</DeviceFrame>
+          <DeviceFrame>
+            {({ width, scale }) =>
+              stage === "generating" ? <PageSkeleton /> : <CanvasFrame className="h-full" width={width} scale={scale} />
+            }
+          </DeviceFrame>
         </CanvasBoundary>
       )}
     </main>

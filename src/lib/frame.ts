@@ -76,6 +76,12 @@ export const FRAME_SCRIPT = `
     var el=e.target.closest&&e.target.closest('[data-vui-id]');
     window.parent.postMessage({type:'select',id:el?el.getAttribute('data-vui-id'):null},'*');
   },true);
+  document.addEventListener('keydown',function(e){
+    if((e.metaKey||e.ctrlKey)&&!e.shiftKey&&!e.altKey&&(e.key==='z'||e.key==='Z')){
+      e.preventDefault();
+      window.parent.postMessage({type:'undo'},'*');
+    }
+  });
   window.addEventListener('scroll',report,{passive:true});
   window.addEventListener('resize',report);
   if(window.ResizeObserver){ new ResizeObserver(report).observe(document.body); }

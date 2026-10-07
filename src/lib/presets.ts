@@ -121,3 +121,13 @@ export function presetForDirection(direction: string): Preset {
   const hit = DIRECTION_KEYWORDS.find(([, re]) => re.test(direction));
   return (hit && getPreset(hit[0])) || DEFAULT_PRESET;
 }
+
+/** The preset a design system came from (radius and density tweaks do not change which one it is). */
+export function presetOfDesignSystem(ds: DesignSystem): Preset | undefined {
+  return PRESETS.find(
+    (p) =>
+      p.designSystem.color.bg === ds.color.bg &&
+      p.designSystem.color.accent === ds.color.accent &&
+      p.designSystem.typography.headingFont === ds.typography.headingFont,
+  );
+}

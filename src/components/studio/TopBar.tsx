@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { DEVICES } from "@/lib/devices";
 import { buildDocument } from "@/lib/export";
-import { PRESETS } from "@/lib/presets";
+import { PRESETS, presetOfDesignSystem } from "@/lib/presets";
 import { useCanvasStore } from "@/lib/store";
 import { useGenerateStore } from "@/store/generate";
 import { useStudioStore } from "@/store/studio";
@@ -19,7 +19,8 @@ const THEME_OPTIONS = [
 
 function currentDocument() {
   const { canvas } = useCanvasStore.getState();
-  return buildDocument(canvas.components, canvas.designSystem, { frame: false });
+  const title = canvas.metadata.intent?.goal.trim().slice(0, 60) || undefined;
+  return buildDocument(canvas.components, canvas.designSystem, { frame: false, title });
 }
 
 function ExportMenu({ disabled }: { disabled: boolean }) {
@@ -42,14 +43,14 @@ function ExportMenu({ disabled }: { disabled: boolean }) {
                 const url = URL.createObjectURL(new Blob([currentDocument()], { type: "text/html" }));
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = "vibe-to-ui.html";
+                a.download = "index.html";
                 a.click();
                 URL.revokeObjectURL(url);
                 close();
                 flash("Downloaded");
               }}
             >
-              Download HTML
+              Download index.html
             </MenuItem>
             <MenuItem
               onSelect={async () => {
@@ -72,10 +73,14 @@ function ExportMenu({ disabled }: { disabled: boolean }) {
 }
 
 export function TopBar() {
-  const { device, setDevice, theme, setTheme, presetId, setPreset, rightOpen, setRightOpen } = useStudioStore();
+  const { device, setDevice, theme, setTheme, presetId, setPreset, rightOpen, setRightOpen, historyOpen, setHistoryOpen } =
+    useStudioStore();
+  const designSystem = useCanvasStore((s) => s.canvas.designSystem);
   const status = useGenerateStore((s) => s.status);
   const pageReady = status === "done" || status === "error";
-  const preset = PRESETS.find((p) => p.id === presetId) ?? PRESETS[0];
+  // After undo/restore the page may be in a different direction than the last one picked: trust the page.
+  const preset =
+    (pageReady ? presetOfDesignSystem(designSystem) : undefined) ?? PRESETS.find((p) => p.id === presetId) ?? PRESETS[0];
 
   return (
     <header className="flex min-h-14 shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-line bg-paper px-4 py-2">
@@ -93,7 +98,7 @@ export function TopBar() {
               <MenuItem
                 key={p.id}
                 role="menuitemradio"
-                checked={p.id === presetId}
+                checked={p.id === preset.id}
                 onSelect={() => {
                   setPreset(p.id, { applyToPage: pageReady });
                   close();
@@ -106,6 +111,17 @@ export function TopBar() {
         </Popover>
         <Segmented label="Theme" value={theme} options={THEME_OPTIONS} onChange={setTheme} />
         <ExportMenu disabled={!pageReady} />
+        <button
+          type="button"
+          id="history-toggle"
+          aria-expanded={historyOpen}
+          aria-controls="history-drawer"
+          disabled={!pageReady}
+          onClick={() => setHistoryOpen(!historyOpen)}
+          className={secondaryButton}
+        >
+          History
+        </button>
         <button
           type="button"
           aria-expanded={rightOpen}

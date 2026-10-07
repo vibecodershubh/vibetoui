@@ -61,8 +61,8 @@ export const useGenerateStore = create<GenerateState>((set) => ({
           intent,
           history: [...canvas.metadata.history, { at: new Date().toISOString(), summary: "Generated page" }],
         },
-      });
-      if (firstGeneration) useCanvasStore.setState({ history: [] });
+      }, firstGeneration ? "Generated page" : "Regenerated page");
+      if (firstGeneration) useCanvasStore.getState().resetHistory("Generated page");
       set(data.fallback ? { status: "error", error: data.error ?? "Couldn't generate, try again." } : { status: "done" });
     } catch (err) {
       useHealthStore.getState().report(false, err instanceof TimeoutError ? "The request timed out." : "Can't reach the server.");

@@ -14,6 +14,10 @@
   --on-accent: #FFFFFF;
   --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
   --float-shadow: 0 10px 28px rgba(28, 25, 23, 0.1), 0 1px 3px rgba(28, 25, 23, 0.08);
+  /* Code view only: muted warm tints, separate from the one UI accent. */
+  --syn-tag: #8B3A2B;
+  --syn-attr: #5A6B7B;
+  --syn-value: #4A6B34;
 }
 
 :root[data-theme="dark"] {
@@ -27,6 +31,9 @@
   --accent-fill: #4338CA;
   --on-accent: #FFFFFF;
   --float-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --syn-tag: #E8A898;
+  --syn-attr: #A9BCCD;
+  --syn-value: #A8CC8E;
 }
 
 @theme inline {
@@ -118,4 +125,22 @@ body {
   .skeleton::after {
     display: none;
   }
+}
+
+/* Syntax highlighting in the Code tab. */
+.syn-tag {
+  color: var(--syn-tag);
+}
+.syn-attr {
+  color: var(--syn-attr);
+}
+.syn-value {
+  color: var(--syn-value);
+}
+.syn-punct,
+.syn-comment {
+  color: var(--stone);
+}
+.syn-comment {
+  font-style: italic;
 }
