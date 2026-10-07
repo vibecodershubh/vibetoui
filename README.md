@@ -347,8 +347,8 @@ src/
 - **No persistence.** The page lives in the browser's memory. Refreshing loses it (use **Export**).
 - **Output quality depends on the model** and on your key's quota. Free tiers are small; use demo mode as a safety net.
 - **The preview and the export load Tailwind (CDN) and Google Fonts**, so they need internet access.
-- **Not yet included:** a version-history drawer with restore and Cmd/Ctrl+Z, syntax-highlighted code, and
-  device widths of 1280/820/390. These exist on a development branch and are not merged.
+- **Not yet included (in progress):** a version-history drawer with one-click restore and Cmd/Ctrl+Z,
+  syntax-highlighted code, and device widths of 1280/820/390 with scale-to-fit. For now, use the toolbar's **Undo**.
 - **No license file yet.** Add one before sharing the code publicly.
 
 ---
