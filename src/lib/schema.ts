@@ -44,12 +44,13 @@ export const ComponentSchema = z.object({
 });
 export type Component = z.infer<typeof ComponentSchema>;
 
+// Length caps matter: these strings are interpolated into the generation prompt.
 export const IntentSchema = z.object({
-  goal: z.string(),
-  audience: z.string(),
-  targetUi: z.string(),
-  visualDirection: z.string(),
-  contentNotes: z.string(),
+  goal: z.string().max(1000),
+  audience: z.string().max(500),
+  targetUi: z.string().max(200),
+  visualDirection: z.string().max(500),
+  contentNotes: z.string().max(4000),
   confidence: z.number().min(0).max(1),
 });
 export type Intent = z.infer<typeof IntentSchema>;
@@ -75,3 +76,35 @@ export const CanvasSchema = z
     path: ["components"],
   });
 export type Canvas = z.infer<typeof CanvasSchema>;
+
+// ---- /api/generate ----
+
+/** Request body. strict(): there is deliberately no place to put a raw user prompt. */
+export const GenerateRequestSchema = z
+  .object({
+    intent: IntentSchema,
+    designSystem: DesignSystemSchema,
+    targetType: z.string().trim().min(1).max(60),
+  })
+  .strict();
+export type GenerateRequest = z.infer<typeof GenerateRequestSchema>;
+
+/** One component as the model returns it. No `locked`: the model never controls locking. */
+export const GeneratedComponentSchema = z.object({
+  id: z.string().regex(/^[a-z0-9][a-z0-9-]{0,39}$/, "id must be lowercase kebab-case, max 40 chars"),
+  type: z.string().min(1).max(40),
+  variant: z.string().min(1).max(60),
+  html: z
+    .string()
+    .min(20)
+    .max(30000)
+    .refine((h) => /<[a-z][\s\S]*>/i.test(h), "html must contain at least one element"),
+  props: z.record(z.string(), z.unknown()).default({}),
+});
+export type GeneratedComponent = z.infer<typeof GeneratedComponentSchema>;
+
+export const GeneratedComponentsSchema = z
+  .array(GeneratedComponentSchema)
+  .min(1)
+  .max(12)
+  .refine((cs) => new Set(cs.map((c) => c.id)).size === cs.length, "component ids must be unique");

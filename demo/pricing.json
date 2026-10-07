@@ -1,0 +1,39 @@
+[
+  {
+    "id": "navbar-1",
+    "type": "navbar",
+    "variant": "simple",
+    "html": "<header class=\"border-b border-line bg-bg\">\n  <div class=\"mx-auto flex max-w-6xl items-center justify-between px-s4 py-s3\">\n    <a href=\"#\" class=\"font-heading text-lg font-semibold text-ink\">Brewline</a>\n    <nav class=\"flex gap-s4 text-sm text-muted\"><a href=\"#\" class=\"transition hover:text-ink\">Lots</a><a href=\"#\" class=\"transition hover:text-ink\">Subscriptions</a><a href=\"#\" class=\"transition hover:text-ink\">Farms</a></nav>\n  </div>\n</header>",
+    "props": {
+      "brand": "Brewline"
+    }
+  },
+  {
+    "id": "pricing-header-1",
+    "type": "header",
+    "variant": "left-aligned",
+    "html": "<section class=\"bg-bg\">\n  <div class=\"mx-auto max-w-6xl px-s4 pb-s4 pt-s6\">\n    <h1 class=\"max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight text-ink md:text-6xl\">Pick how often the beans arrive.</h1>\n    <p class=\"mt-s3 max-w-[56ch] text-lg leading-relaxed text-muted\">Three plans, one price per delivery, shipping included. Change or pause from your order page.</p>\n  </div>\n</section>",
+    "props": {}
+  },
+  {
+    "id": "plans-1",
+    "type": "pricing",
+    "variant": "three-plans",
+    "html": "<section class=\"bg-bg\">\n  <div class=\"mx-auto grid max-w-6xl gap-s4 px-s4 pb-s6 md:grid-cols-3\">\n    <div class=\"flex flex-col rounded-ui border border-line p-s4\">\n  <h3 class=\"font-medium text-ink\">Weekly</h3>\n  <p class=\"mt-s2 text-4xl font-semibold tracking-tight text-ink\">$18<span class=\"text-base font-normal text-muted\"> / delivery</span></p>\n  <p class=\"mt-s2 text-sm leading-relaxed text-muted\">One 340 g bag every week for people who go through a lot.</p>\n  <ul class=\"mt-s3 grid gap-s2 border-t border-line pt-s3 text-sm text-ink\"><li>Whole bean or ground</li><li>Roast date on every bag</li><li>Skip any week</li></ul>\n  <a href=\"#\" class=\"mt-s4 inline-block rounded-ui px-s4 py-s2 text-center font-medium transition border border-line text-ink hover:bg-surface\">Choose Weekly</a>\n</div>\n    <div class=\"flex flex-col rounded-ui border border-line p-s4 bg-surface\">\n  <h3 class=\"font-medium text-ink\">Fortnightly</h3>\n  <p class=\"mt-s2 text-4xl font-semibold tracking-tight text-ink\">$19<span class=\"text-base font-normal text-muted\"> / delivery</span></p>\n  <p class=\"mt-s2 text-sm leading-relaxed text-muted\">A bag every two weeks. The one most households settle on.</p>\n  <ul class=\"mt-s3 grid gap-s2 border-t border-line pt-s3 text-sm text-ink\"><li>Whole bean or ground</li><li>Roast date on every bag</li><li>Skip any delivery</li><li>Free brewing guide</li></ul>\n  <a href=\"#\" class=\"mt-s4 inline-block rounded-ui px-s4 py-s2 text-center font-medium transition bg-accent text-on-accent hover:opacity-90\">Choose Fortnightly</a>\n</div>\n    <div class=\"flex flex-col rounded-ui border border-line p-s4\">\n  <h3 class=\"font-medium text-ink\">Monthly</h3>\n  <p class=\"mt-s2 text-4xl font-semibold tracking-tight text-ink\">$21<span class=\"text-base font-normal text-muted\"> / delivery</span></p>\n  <p class=\"mt-s2 text-sm leading-relaxed text-muted\">A bag a month for the occasional cup.</p>\n  <ul class=\"mt-s3 grid gap-s2 border-t border-line pt-s3 text-sm text-ink\"><li>Whole bean or ground</li><li>Roast date on every bag</li><li>Skip any month</li></ul>\n  <a href=\"#\" class=\"mt-s4 inline-block rounded-ui px-s4 py-s2 text-center font-medium transition border border-line text-ink hover:bg-surface\">Choose Monthly</a>\n</div>\n  </div>\n</section>",
+    "props": {}
+  },
+  {
+    "id": "note-1",
+    "type": "faq",
+    "variant": "note",
+    "html": "<section class=\"border-t border-line bg-bg\">\n  <div class=\"mx-auto grid max-w-6xl gap-s3 px-s4 py-s5 md:grid-cols-12\">\n    <h2 class=\"text-2xl font-semibold tracking-tight text-ink md:col-span-4\">Before you choose</h2>\n    <p class=\"max-w-[60ch] leading-relaxed text-muted md:col-span-8\">Prices are per delivery and include shipping within the country. You are charged when each bag ships, never in advance, and you can cancel from the order page without contacting anyone.</p>\n  </div>\n</section>",
+    "props": {}
+  },
+  {
+    "id": "footer-1",
+    "type": "footer",
+    "variant": "simple",
+    "html": "<footer class=\"border-t border-line bg-bg\">\n  <div class=\"mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-s3 px-s4 py-s4 text-sm text-muted\">\n    <span>Brewline Coffee Roasters</span>\n    <nav class=\"flex gap-s4\"><a href=\"#\" class=\"transition hover:text-ink\">Shipping</a><a href=\"#\" class=\"transition hover:text-ink\">Wholesale</a><a href=\"#\" class=\"transition hover:text-ink\">Contact</a></nav>\n  </div>\n</footer>",
+    "props": {}
+  }
+]

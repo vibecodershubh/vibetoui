@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Preview } from "@/components/Preview";
+import { CanvasFrame } from "@/components/CanvasFrame";
 import { useGenerateStore } from "@/store/generate";
 
 export default function Home() {
-  const [prompt, setPrompt] = useState("");
-  const { status, html, error, generate } = useGenerateStore();
+  const [idea, setIdea] = useState("");
+  const { status, error, generate } = useGenerateStore();
   const loading = status === "loading";
 
   return (
@@ -17,18 +17,18 @@ export default function Home() {
         className="flex gap-3"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!loading) generate(prompt);
+          if (!loading && idea.trim()) generate(idea);
         }}
       >
         <input
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
           placeholder="Describe your idea, e.g. a landing page for a coffee subscription"
           className="flex-1 rounded-lg border border-zinc-300 px-4 py-2 outline-none focus:border-zinc-900"
         />
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !idea.trim()}
           className="rounded-lg bg-zinc-900 px-5 py-2 font-medium text-white disabled:opacity-50"
         >
           {loading ? "Generating…" : "Generate"}
@@ -41,13 +41,7 @@ export default function Home() {
         </div>
       )}
 
-      {html ? (
-        <Preview html={html} />
-      ) : (
-        <div className="flex h-[600px] items-center justify-center rounded-lg border border-dashed border-zinc-300 text-sm text-zinc-500">
-          {loading ? "Generating your UI…" : "Your generated UI will appear here."}
-        </div>
-      )}
+      <CanvasFrame className="h-[75vh]" />
     </main>
   );
 }

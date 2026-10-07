@@ -1,0 +1,44 @@
+[
+  {
+    "id": "navbar-1",
+    "type": "navbar",
+    "variant": "simple",
+    "html": "<header class=\"border-b border-line bg-bg\">\n  <div class=\"mx-auto flex max-w-6xl items-center justify-between px-s4 py-s3\">\n    <a href=\"#\" class=\"font-heading text-lg font-semibold text-ink\">Brewline</a>\n    <nav class=\"flex gap-s4 text-sm text-muted\"><a href=\"#\" class=\"transition hover:text-ink\">Lots</a><a href=\"#\" class=\"transition hover:text-ink\">Subscriptions</a><a href=\"#\" class=\"transition hover:text-ink\">Farms</a></nav>\n  </div>\n</header>",
+    "props": {
+      "brand": "Brewline"
+    }
+  },
+  {
+    "id": "hero-1",
+    "type": "hero",
+    "variant": "split-detail",
+    "html": "<section class=\"bg-bg\">\n  <div class=\"mx-auto grid max-w-6xl gap-s5 px-s4 py-s6 md:grid-cols-12\">\n    <div class=\"md:col-span-8\">\n      <p class=\"text-sm font-medium text-muted\">Spring harvest, Huila, Colombia</p>\n      <h1 class=\"mt-s2 max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight text-ink md:text-6xl\">A coffee you can taste the farm in.</h1>\n      <p class=\"mt-s3 max-w-[56ch] text-lg leading-relaxed text-muted\">Roasted in small lots the week it ships, with the farmer's name printed on every bag.</p>\n      <div class=\"mt-s4 flex flex-wrap items-center gap-s3\">\n        <a href=\"#\" class=\"rounded-ui bg-accent px-s4 py-s2 font-medium text-on-accent transition hover:opacity-90\">Start a subscription</a>\n        <a href=\"#\" class=\"font-medium text-ink underline underline-offset-4\">See this month's lots</a>\n      </div>\n    </div>\n    <dl class=\"grid gap-s2 self-end border-t border-line pt-s3 text-sm md:col-span-4\">\n      <div class=\"flex justify-between gap-s3\"><dt class=\"text-muted\">Roasted</dt><dd class=\"text-ink\">Mondays</dd></div>\n      <div class=\"flex justify-between gap-s3\"><dt class=\"text-muted\">Ships</dt><dd class=\"text-ink\">Tuesdays</dd></div>\n      <div class=\"flex justify-between gap-s3\"><dt class=\"text-muted\">Bag</dt><dd class=\"text-ink\">340 g, whole bean</dd></div>\n    </dl>\n  </div>\n</section>",
+    "props": {
+      "headline": "A coffee you can taste the farm in.",
+      "ctaLabel": "Start a subscription"
+    }
+  },
+  {
+    "id": "features-1",
+    "type": "features",
+    "variant": "divided-list",
+    "html": "<section class=\"bg-bg\">\n  <div class=\"mx-auto grid max-w-6xl gap-s5 px-s4 py-s6 md:grid-cols-12\">\n    <h2 class=\"max-w-md text-3xl font-semibold leading-tight tracking-tight text-ink md:col-span-4\">What changes when the roaster knows the farm</h2>\n    <div class=\"md:col-span-8\">\n      <div class=\"border-t border-line py-s3\">\n        <h3 class=\"font-medium text-ink\">Roasted to order</h3>\n        <p class=\"mt-s1 max-w-[52ch] leading-relaxed text-muted\">Beans go into the drum on Monday and into your mailbox by Thursday. Nothing sits on a shelf.</p>\n      </div>\n      <div class=\"border-t border-line py-s3\">\n        <h3 class=\"font-medium text-ink\">Priced at the farm gate first</h3>\n        <p class=\"mt-s1 max-w-[52ch] leading-relaxed text-muted\">We pay the grower before we set our margin, and publish both numbers on each lot page.</p>\n      </div>\n      <div class=\"border-y border-line py-s3\">\n        <h3 class=\"font-medium text-ink\">Pause in one click</h3>\n        <p class=\"mt-s1 max-w-[52ch] leading-relaxed text-muted\">Away for a month? Skip it from the order page. No email, no call.</p>\n      </div>\n    </div>\n  </div>\n</section>",
+    "props": {}
+  },
+  {
+    "id": "cta-1",
+    "type": "cta",
+    "variant": "band",
+    "html": "<section class=\"bg-surface\">\n  <div class=\"mx-auto grid max-w-6xl items-end gap-s4 px-s4 py-s6 md:grid-cols-12\">\n    <h2 class=\"max-w-xl text-3xl font-semibold leading-tight tracking-tight text-ink md:col-span-8 md:text-4xl\">Your first bag ships this Tuesday.</h2>\n    <div class=\"md:col-span-4 md:text-right\">\n      <a href=\"#\" class=\"inline-block rounded-ui bg-accent px-s4 py-s2 font-medium text-on-accent transition hover:opacity-90\">Start a subscription</a>\n      <p class=\"mt-s2 text-sm text-muted\">Pause or cancel anytime.</p>\n    </div>\n  </div>\n</section>",
+    "props": {
+      "headline": "Your first bag ships this Tuesday."
+    }
+  },
+  {
+    "id": "footer-1",
+    "type": "footer",
+    "variant": "simple",
+    "html": "<footer class=\"border-t border-line bg-bg\">\n  <div class=\"mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-s3 px-s4 py-s4 text-sm text-muted\">\n    <span>Brewline Coffee Roasters</span>\n    <nav class=\"flex gap-s4\"><a href=\"#\" class=\"transition hover:text-ink\">Shipping</a><a href=\"#\" class=\"transition hover:text-ink\">Wholesale</a><a href=\"#\" class=\"transition hover:text-ink\">Contact</a></nav>\n  </div>\n</footer>",
+    "props": {}
+  }
+]
