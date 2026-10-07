@@ -1,4 +1,4 @@
-import type { GenerateRequest } from "./schema";
+import type { DesignSystem, GenerateRequest } from "./schema";
 import { TASTE_SKILL } from "./taste";
 
 const OUTPUT_FORMAT = `## OUTPUT FORMAT (overrides any earlier "output only HTML" instruction)
@@ -13,6 +13,13 @@ Return ONLY a JSON array. No prose, no markdown fences. Each element is one page
 
 /** Static (cacheable) system prompt: the taste rules plus the output contract. */
 export const GENERATION_SYSTEM = `${TASTE_SKILL}\n\n${OUTPUT_FORMAT}`;
+
+/** The design system as orientation text for a prompt. The look is applied via tokens, not these values. */
+export function designSystemBrief(ds: DesignSystem): string {
+  return `Heading font: ${ds.typography.headingFont}. Body font: ${ds.typography.bodyFont}.
+Palette: background ${ds.color.bg}, surface ${ds.color.surface}, ink ${ds.color.ink}, muted ${ds.color.muted}, single accent ${ds.color.accent}.
+Corner radius: ${ds.radius.base}. Density: ${ds.spacing.density}. Motion: ${ds.motion.level}.`;
+}
 
 /**
  * Builds the generation prompt from structured inputs only. The raw user prompt never reaches
@@ -37,9 +44,7 @@ Confidence in this brief: ${intent.confidence.toFixed(2)}${
 
 <design_system>
 The look is already applied through the design tokens (use the token classes, never raw values). For orientation only:
-Heading font: ${ds.typography.headingFont}. Body font: ${ds.typography.bodyFont}.
-Palette: background ${ds.color.bg}, surface ${ds.color.surface}, ink ${ds.color.ink}, muted ${ds.color.muted}, single accent ${ds.color.accent}.
-Corner radius: ${ds.radius.base}. Density: ${ds.spacing.density}. Motion: ${ds.motion.level}.
+${designSystemBrief(ds)}
 </design_system>
 
 Return the JSON array now.`;

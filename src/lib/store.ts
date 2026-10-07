@@ -17,6 +17,8 @@ interface CanvasState {
   selectComponent: (id: string | null) => void;
   toggleLock: (id: string) => void;
   replaceComponent: (id: string, component: Component) => ReplaceResult;
+  /** Inserts an unlocked copy right after `id` (new unique id), selects it, returns the new id. */
+  duplicateComponent: (id: string) => string | null;
   undo: () => void;
 }
 
@@ -72,6 +74,30 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
       history: pushSnapshot(s.history, s.canvas),
     }));
     return { ok: true };
+  },
+
+  duplicateComponent: (id) => {
+    const { canvas } = get();
+    const index = canvas.components.findIndex((c) => c.id === id);
+    if (index === -1) return null;
+    const source = canvas.components[index];
+
+    // "hero-1" -> "hero-2", "hero-3", ... (ids are at most 40 chars, lowercase kebab-case)
+    const base = source.id.replace(/-\d+$/, "").slice(0, 34);
+    const taken = new Set(canvas.components.map((c) => c.id));
+    let n = 2;
+    while (taken.has(`${base}-${n}`)) n++;
+    const newId = `${base}-${n}`;
+
+    const copy: Component = { ...source, id: newId, props: { ...source.props }, locked: false };
+    const components = [...canvas.components];
+    components.splice(index + 1, 0, copy);
+    set((s) => ({
+      canvas: { ...s.canvas, components },
+      history: pushSnapshot(s.history, s.canvas),
+      selectedId: newId,
+    }));
+    return newId;
   },
 
   // Restores the previous snapshot but keeps current lock flags, so undo can't unlock/lock anything.
