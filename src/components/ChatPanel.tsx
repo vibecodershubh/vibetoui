@@ -77,9 +77,21 @@ export function ChatPanel() {
             </Message>
             <div className="flex gap-2">
               {failed && (
-                <button type="button" onClick={retry} className={secondaryButton}>
-                  Try again
-                </button>
+                <>
+                  <button type="button" onClick={retry} className={secondaryButton}>
+                    Try again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      useStudioStore.getState().setDemo(true);
+                      retry();
+                    }}
+                    className={secondaryButton}
+                  >
+                    Use demo data
+                  </button>
+                </>
               )}
               <button type="button" onClick={reset} className={secondaryButton}>
                 Start over

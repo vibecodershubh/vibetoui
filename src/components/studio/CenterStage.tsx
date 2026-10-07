@@ -3,6 +3,7 @@
 import { useGenerateStore } from "@/store/generate";
 import { useInterviewStore } from "@/store/interview";
 import { CanvasFrame } from "../CanvasFrame";
+import { CanvasBoundary } from "./CanvasBoundary";
 import { DeviceFrame } from "./DeviceFrame";
 import { EmptyState } from "./EmptyState";
 import { PageSkeleton } from "./Skeleton";
@@ -38,11 +39,13 @@ export function CenterStage({ className = "" }: { className?: string }) {
         </div>
       )}
       {(stage === "generating" || stage === "ready") && (
-        <DeviceFrame>
-          {({ width, scale }) =>
-            stage === "generating" ? <PageSkeleton /> : <CanvasFrame className="h-full" width={width} scale={scale} />
-          }
-        </DeviceFrame>
+        <CanvasBoundary>
+          <DeviceFrame>
+            {({ width, scale }) =>
+              stage === "generating" ? <PageSkeleton /> : <CanvasFrame className="h-full" width={width} scale={scale} />
+            }
+          </DeviceFrame>
+        </CanvasBoundary>
       )}
     </main>
   );

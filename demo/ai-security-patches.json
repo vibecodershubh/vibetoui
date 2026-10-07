@@ -1,0 +1,31 @@
+{
+  "hero-1": [
+    {
+      "match": "editorial|noise|quiet|calm|clean|simpl|minimal",
+      "component": {
+        "id": "hero-1",
+        "type": "hero",
+        "variant": "editorial-split",
+        "html": "<section class=\"bg-bg\">\n  <div class=\"mx-auto grid max-w-6xl gap-s5 px-s4 py-s6 md:grid-cols-12\">\n    <div class=\"md:col-span-8\">\n      <p class=\"text-sm font-medium text-muted\">Northgate, AI security for the enterprise</p>\n      <h1 class=\"mt-s2 max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight text-ink md:text-6xl\">Every model call, inspected before it leaves your network.</h1>\n      <p class=\"mt-s3 max-w-[56ch] text-lg leading-relaxed text-muted\">Northgate sits between your teams and the models they use. It blocks prompt injection and data leaks, and leaves a record your auditors can read.</p>\n      <div class=\"mt-s4 flex flex-wrap items-center gap-s3\">\n        <a href=\"#\" class=\"rounded-ui bg-accent px-s4 py-s2 font-medium text-on-accent transition hover:opacity-90\">Book a demo</a>\n        <a href=\"#\" class=\"font-medium text-ink underline underline-offset-4\">Read the architecture</a>\n      </div>\n    </div>\n    <dl class=\"grid gap-s2 self-end border-t border-line pt-s3 text-sm md:col-span-4\">\n      <div class=\"flex justify-between gap-s3\"><dt class=\"text-muted\">Runs in</dt><dd class=\"text-ink\">Your VPC</dd></div>\n      <div class=\"flex justify-between gap-s3\"><dt class=\"text-muted\">Policies</dt><dd class=\"text-ink\">One ruleset, every model</dd></div>\n      <div class=\"flex justify-between gap-s3\"><dt class=\"text-muted\">Records</dt><dd class=\"text-ink\">Per-request audit log</dd></div>\n    </dl>\n  </div>\n</section>",
+        "props": {
+          "demo": "ai-security",
+          "headline": "Every model call, inspected before it leaves your network."
+        }
+      }
+    }
+  ],
+  "features-1": [
+    {
+      "match": ".",
+      "component": {
+        "id": "features-1",
+        "type": "features",
+        "variant": "numbered-list",
+        "html": "<section class=\"bg-bg\">\n  <div class=\"mx-auto grid max-w-6xl gap-s5 px-s4 py-s6 md:grid-cols-12\">\n    <h2 class=\"max-w-md text-3xl font-semibold leading-tight tracking-tight text-ink md:col-span-4\">Three controls, enforced at the gateway</h2>\n    <ol class=\"md:col-span-8\">\n      <li class=\"grid grid-cols-[2.5rem_1fr] gap-s2 border-t border-line py-s3\"><span class=\"text-sm text-muted\">01</span><p><span class=\"font-medium text-ink\">Prompt injection defense.</span> <span class=\"text-muted\">Hostile instructions are stripped before the model sees them.</span></p></li>\n      <li class=\"grid grid-cols-[2.5rem_1fr] gap-s2 border-t border-line py-s3\"><span class=\"text-sm text-muted\">02</span><p><span class=\"font-medium text-ink\">Data leakage controls.</span> <span class=\"text-muted\">Sensitive data is masked or blocked, in prompts and in answers.</span></p></li>\n      <li class=\"grid grid-cols-[2.5rem_1fr] gap-s2 border-y border-line py-s3\"><span class=\"text-sm text-muted\">03</span><p><span class=\"font-medium text-ink\">Audit trail.</span> <span class=\"text-muted\">Every request and decision is logged and exportable.</span></p></li>\n    </ol>\n  </div>\n</section>",
+        "props": {
+          "demo": "ai-security"
+        }
+      }
+    }
+  ]
+}

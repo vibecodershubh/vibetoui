@@ -1,4 +1,6 @@
-import { createAnthropicComplete, generateValidated } from "@/lib/llm";
+import { demoDelay, findSavedPatch, isDemoRequest } from "@/lib/demo";
+import { missingGeminiConfig } from "@/lib/gemini";
+import { createGeminiComplete, generateValidated } from "@/lib/llm";
 import {
   PATCH_SYSTEM,
   PatchError,
@@ -53,15 +55,19 @@ export async function POST(request: Request) {
   };
   const unchanged = (error: string) => Response.json({ component: target satisfies Component, discarded: [], fallback: true, error });
 
-  if (process.env.DEMO_MODE === "true") return respond(demoPatch(target, edit), { demo: true });
+  if (isDemoRequest(request)) {
+    await demoDelay("patch");
+    return respond(demoPatch(target, edit, findSavedPatch(target, edit)), { demo: true });
+  }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("[patch] ANTHROPIC_API_KEY is not set");
-    return unchanged("ANTHROPIC_API_KEY is not set. Add it to .env.local or set DEMO_MODE=true.");
+  const missing = missingGeminiConfig();
+  if (missing) {
+    console.error(`[patch] ${missing}`);
+    return unchanged(missing);
   }
 
   const result = await generateValidated({
-    complete: createAnthropicComplete({ maxTokens: 16_000 }),
+    complete: createGeminiComplete(),
     system: PATCH_SYSTEM,
     user: buildPatchPrompt(target, edit, designSystem),
     schema: patchOutputSchema(componentId),
