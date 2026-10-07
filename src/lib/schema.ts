@@ -1,23 +1,32 @@
 import { z } from "zod";
 
+// These values are interpolated into a <style> block and a Google Fonts URL, so they are
+// validated strictly: a bad (or model-written) value must not be able to break out of either.
+const HexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const CssLength = z
+  .string()
+  .regex(/^(?:0|\d*\.?\d+(?:px|rem|em|vw|vh|%)|clamp\([0-9a-z.,\s%+*/-]+\))$/);
+const FontName = z.string().regex(/^[A-Za-z0-9 ]{1,40}$/);
+
 export const DesignSystemSchema = z.object({
   typography: z.object({
-    headingFont: z.string(),
-    bodyFont: z.string(),
-    scale: z.enum(["compact", "default", "large"]),
+    headingFont: FontName, // Google Fonts family name
+    bodyFont: FontName,
   }),
   color: z.object({
-    primary: z.string(),
-    secondary: z.string(),
-    background: z.string(),
-    foreground: z.string(),
-    accent: z.string(),
+    bg: HexColor,
+    surface: HexColor,
+    ink: HexColor,
+    muted: HexColor,
+    accent: HexColor, // the ONE accent
+    onAccent: HexColor, // text color on accent fills
   }),
   spacing: z.object({
     density: z.enum(["compact", "comfortable", "spacious"]),
+    scale: z.array(CssLength).length(6), // --space-1 .. --space-6 (6 = section rhythm)
   }),
   radius: z.object({
-    scale: z.enum(["none", "sm", "md", "lg", "full"]),
+    base: CssLength, // --radius; large containers use 2x
   }),
   motion: z.object({
     level: z.enum(["none", "subtle", "expressive"]),

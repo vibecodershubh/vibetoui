@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { sanitizeHtml } from "@/lib/html";
 import { useCanvasStore } from "@/lib/store";
+import { designSystemCss, fontsHref, TAILWIND_THEME } from "@/lib/theme";
 
 const TAILWIND_CDN = "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4";
 
@@ -46,10 +47,11 @@ const escapeAttr = (s: string) =>
 
 export function CanvasFrame({ className = "" }: { className?: string }) {
   const components = useCanvasStore((s) => s.canvas.components);
+  const designSystem = useCanvasStore((s) => s.canvas.designSystem);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // srcDoc depends only on content, so selecting/locking never reloads the iframe.
-  const contentKey = JSON.stringify(components.map((c) => [c.id, c.type, c.html]));
+  const contentKey = JSON.stringify([designSystem, components.map((c) => [c.id, c.type, c.html])]);
   const srcDoc = useMemo(() => {
     const body = components
       .map(
@@ -59,7 +61,11 @@ export function CanvasFrame({ className = "" }: { className?: string }) {
       .join("\n");
     return `<!doctype html>
 <html><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="${fontsHref(designSystem)}" />
+<style>${designSystemCss(designSystem)}</style>
 <script src="${TAILWIND_CDN}"></script>
+<style type="text/tailwindcss">${TAILWIND_THEME}</style>
 <style>${FRAME_STYLE}</style></head>
 <body>${body}<script>${FRAME_SCRIPT}</script></body></html>`;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on content only

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { CanvasFrame } from "@/components/CanvasFrame";
+import { PRESETS } from "@/lib/presets";
 import { useCanvasStore } from "@/lib/store";
 
 // Test harness for selection + locking, no AI involved.
 export default function CanvasTestPage() {
-  const { canvas, selectedId, history, selectComponent, toggleLock, replaceComponent, undo } =
+  const { canvas, selectedId, history, selectComponent, setCanvas, toggleLock, replaceComponent, undo } =
     useCanvasStore();
   const [message, setMessage] = useState<string | null>(null);
   const selected = canvas.components.find((c) => c.id === selectedId) ?? null;
@@ -26,6 +27,18 @@ export default function CanvasTestPage() {
 
       <aside className="flex w-64 shrink-0 flex-col gap-4 text-sm">
         <h1 className="text-lg font-semibold">Canvas test</h1>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Design direction">
+          {PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              onClick={() => setCanvas({ ...canvas, designSystem: preset.designSystem })}
+              aria-pressed={JSON.stringify(canvas.designSystem) === JSON.stringify(preset.designSystem)}
+              className="rounded-lg border border-zinc-300 px-2 py-1 aria-pressed:border-zinc-900 aria-pressed:bg-zinc-900 aria-pressed:text-white"
+            >
+              {preset.name}
+            </button>
+          ))}
+        </div>
         <ul className="flex flex-col gap-2">
           {canvas.components.map((c) => (
             <li
