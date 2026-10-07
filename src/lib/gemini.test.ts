@@ -81,3 +81,22 @@ describe("toLlmError", () => {
     });
   });
 });
+
+describe("toLlmError: quota", () => {
+  const api = (status: number, message: string) => new ApiError({ message, status });
+
+  it("a DAILY quota is not retryable (retrying cannot help for hours) and says what is wrong", () => {
+    const daily = toLlmError(
+      api(429, 'You exceeded your current quota. Quota exceeded for metric: generate_content_free_tier_requests, limit: 20 "quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"'),
+    );
+    expect(daily.retryable).toBe(false);
+    expect(daily.message).toBe("quota exceeded");
+    expect(daily.userMessage).toMatch(/quota .* used up/i);
+    expect(daily.userMessage).toMatch(/demo data/i);
+  });
+
+  it("a per-minute limit is still retried", () => {
+    const perMinute = toLlmError(api(429, 'You exceeded your current quota "quotaId":"GenerateRequestsPerMinutePerProjectPerModel-FreeTier"'));
+    expect(perMinute).toMatchObject({ retryable: true, message: "rate limited" });
+  });
+});

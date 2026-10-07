@@ -1,0 +1,31 @@
+[
+  {
+    "id": "navbar-1",
+    "type": "navbar",
+    "variant": "simple",
+    "html": "<header class=\"border-b border-line bg-bg\">\n  <div class=\"mx-auto flex max-w-6xl items-center justify-between gap-s3 px-s4 py-s3\">\n    <a href=\"#\" class=\"font-heading text-lg font-semibold text-ink\">Northgate</a>\n    <nav class=\"flex gap-s4 text-sm text-muted\"><a href=\"#\" class=\"transition hover:text-ink\">Platform</a><a href=\"#\" class=\"transition hover:text-ink\">Security</a><a href=\"#\" class=\"transition hover:text-ink\">Docs</a></nav>\n  </div>\n</header>",
+    "props": {
+      "demo": "ai-security",
+      "brand": "Northgate"
+    }
+  },
+  {
+    "id": "hero-1",
+    "type": "hero",
+    "variant": "centered-boxed",
+    "html": "<section class=\"bg-bg\">\n  <div class=\"mx-auto max-w-6xl px-s4 py-s6\">\n    <span class=\"inline-block rounded-ui border border-line bg-surface px-s2 py-s1 text-xs font-medium text-muted\">AI security for the enterprise</span>\n    <h1 class=\"mt-s3 max-w-3xl text-5xl font-semibold leading-[1.05] tracking-tight text-ink md:text-6xl\">Every model call, inspected before it leaves your network.</h1>\n    <p class=\"mt-s3 max-w-[56ch] text-lg leading-relaxed text-muted\">Northgate sits between your teams and the models they use. It blocks prompt injection and data leaks without slowing anyone down.</p>\n    <div class=\"mt-s4 flex flex-wrap items-center gap-s3\">\n      <a href=\"#\" class=\"rounded-ui bg-accent px-s4 py-s2 font-medium text-on-accent transition hover:opacity-90\">Book a demo</a>\n      <a href=\"#\" class=\"rounded-ui border border-line px-s4 py-s2 font-medium text-ink transition hover:bg-surface\">Read the architecture</a>\n    </div>\n    <div class=\"mt-s5 grid gap-s3 md:grid-cols-3\">\n      <div class=\"rounded-ui border border-line bg-surface p-s3\"><p class=\"text-sm font-medium text-ink\">Inline gateway</p><p class=\"mt-s1 text-sm text-muted\">Runs in your VPC.</p></div>\n      <div class=\"rounded-ui border border-line bg-surface p-s3\"><p class=\"text-sm font-medium text-ink\">Policy engine</p><p class=\"mt-s1 text-sm text-muted\">One ruleset, every model.</p></div>\n      <div class=\"rounded-ui border border-line bg-surface p-s3\"><p class=\"text-sm font-medium text-ink\">Audit log</p><p class=\"mt-s1 text-sm text-muted\">Per-request records.</p></div>\n    </div>\n  </div>\n</section>",
+    "props": {
+      "demo": "ai-security",
+      "headline": "Every model call, inspected before it leaves your network."
+    }
+  },
+  {
+    "id": "features-1",
+    "type": "features",
+    "variant": "three-column",
+    "html": "<section class=\"bg-surface\">\n  <div class=\"mx-auto max-w-6xl px-s4 py-s6\">\n    <h2 class=\"max-w-xl text-3xl font-semibold leading-tight tracking-tight text-ink\">Controls your security team can actually enforce</h2>\n    <div class=\"mt-s5 grid gap-s5 md:grid-cols-3\">\n      <div class=\"border-t border-line pt-s3\"><h3 class=\"font-medium text-ink\">Prompt injection defense</h3><p class=\"mt-s1 max-w-[40ch] leading-relaxed text-muted\">Hostile instructions hidden in documents, tickets and web pages are stripped before the model ever sees them.</p></div>\n      <div class=\"border-t border-line pt-s3\"><h3 class=\"font-medium text-ink\">Data leakage controls</h3><p class=\"mt-s1 max-w-[40ch] leading-relaxed text-muted\">Customer records, credentials and source code are detected in prompts and responses, then masked or blocked by policy.</p></div>\n      <div class=\"border-t border-line pt-s3\"><h3 class=\"font-medium text-ink\">Audit trail</h3><p class=\"mt-s1 max-w-[40ch] leading-relaxed text-muted\">Every request, decision and override is logged, searchable, and exportable for your next review.</p></div>\n    </div>\n  </div>\n</section>",
+    "props": {
+      "demo": "ai-security"
+    }
+  }
+]

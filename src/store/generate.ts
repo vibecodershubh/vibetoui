@@ -1,13 +1,16 @@
 import { create } from "zustand";
 import { z } from "zod";
+import { TIMEOUTS, TimeoutError, requestJson } from "@/lib/http";
 import { getPreset, presetForDirection } from "@/lib/presets";
 import { GeneratedComponentsSchema, type Intent } from "@/lib/schema";
 import { useCanvasStore } from "@/lib/store";
+import { useHealthStore } from "./health";
 import { useStudioStore } from "./studio";
 
 const ResponseSchema = z.union([
   z.object({
     components: GeneratedComponentsSchema,
+    demo: z.boolean().optional(),
     fallback: z.boolean().optional(),
     error: z.string().optional(),
   }),
@@ -37,16 +40,17 @@ export const useGenerateStore = create<GenerateState>((set) => ({
       const designSystem = preset.designSystem;
       intent = { ...intent, visualDirection: preset.name };
       const { canvas, setCanvas } = useCanvasStore.getState();
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent, designSystem, targetType: intent.targetUi.slice(0, 60) || "landing page" }),
-      });
-      const data = ResponseSchema.parse(await res.json());
+      const data = ResponseSchema.parse(
+        await requestJson("/api/generate", {
+          body: { intent, designSystem, targetType: intent.targetUi.slice(0, 60) || "landing page" },
+          timeoutMs: TIMEOUTS.generate,
+        }),
+      );
       if (!("components" in data)) {
         set({ status: "error", error: data.error });
         return;
       }
+      if (!data.demo) useHealthStore.getState().report(!data.fallback, data.error);
       // The canvas starts as a built-in sample. The first generation replaces it, and there is nothing
       // real to undo back to, so Undo must not resurrect the sample.
       const firstGeneration = canvas.metadata.history.length === 0;
@@ -60,8 +64,15 @@ export const useGenerateStore = create<GenerateState>((set) => ({
       });
       if (firstGeneration) useCanvasStore.setState({ history: [] });
       set(data.fallback ? { status: "error", error: data.error ?? "Couldn't generate, try again." } : { status: "done" });
-    } catch {
-      set({ status: "error", error: "Couldn't reach the server. Is `npm run dev` running?" });
+    } catch (err) {
+      useHealthStore.getState().report(false, err instanceof TimeoutError ? "The request timed out." : "Can't reach the server.");
+      set({
+        status: "error",
+        error:
+          err instanceof TimeoutError
+            ? "Generation took too long. Try again, or switch to demo data."
+            : "Couldn't reach the server. Is `npm run dev` running?",
+      });
     }
   },
 }));

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PRESETS, presetForDirection } from "@/lib/presets";
 import type { Intent } from "@/lib/schema";
 import { useInterviewStore } from "@/store/interview";
+import { useStudioStore } from "@/store/studio";
 import { primaryButton } from "./studio/EmptyState";
 import { secondaryButton } from "./studio/Popover";
 
@@ -36,7 +37,18 @@ export function SummaryCard() {
   return (
     <div className="rounded-card border border-line bg-panel p-4 text-sm text-ink">
       <h3 className="font-serif text-xl">Here&apos;s what I understood</h3>
-      {notice && <p className="mt-1 text-xs text-stone">{notice}</p>}
+      {notice && (
+        <p className="mt-1 text-xs text-stone">
+          {notice}{" "}
+          <button
+            type="button"
+            onClick={() => useStudioStore.getState().setDemo(true)}
+            className="underline underline-offset-4 hover:text-ink"
+          >
+            Use demo data
+          </button>
+        </p>
+      )}
 
       {editing ? (
         <div className="mt-3 grid gap-3">

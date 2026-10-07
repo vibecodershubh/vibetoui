@@ -6,7 +6,7 @@ import { useCanvasStore } from "@/lib/store";
 export type Theme = "light" | "dark";
 export type RightTab = "design" | "code";
 
-const KEYS = { theme: "vtu-theme", device: "vtu-device", right: "vtu-right-open" } as const;
+const KEYS = { theme: "vtu-theme", device: "vtu-device", right: "vtu-right-open", demo: "vtu-demo" } as const;
 
 // localStorage can throw (private mode, blocked storage) or be empty: never depend on it.
 const read = (key: string): string | null => {
@@ -30,6 +30,8 @@ interface StudioState {
   /** The visual direction preset: used for the next generation and shown in the top bar. */
   presetId: string;
   rightOpen: boolean;
+  /** Serve saved demo data for every request (one click when the live API is down). Also: ?demo=1 in the URL. */
+  demo: boolean;
   rightTab: RightTab;
   /** The idea typed in the empty state (shared with the "Skip, just generate" button). */
   draft: string;
@@ -39,6 +41,7 @@ interface StudioState {
   setTheme: (theme: Theme) => void;
   setDevice: (device: DeviceId) => void;
   setRightOpen: (open: boolean) => void;
+  setDemo: (on: boolean) => void;
   setRightTab: (tab: RightTab) => void;
   setDraft: (draft: string) => void;
   /** Choose a direction. With `applyToPage`, the visible page is re-themed too (undoable). */
@@ -50,6 +53,7 @@ export const useStudioStore = create<StudioState>((set) => ({
   device: "desktop",
   presetId: DEFAULT_PRESET.id,
   rightOpen: true,
+  demo: false,
   rightTab: "design",
   draft: "",
 
@@ -57,10 +61,14 @@ export const useStudioStore = create<StudioState>((set) => ({
     const theme = document.documentElement.dataset.theme === "dark" ? "dark" : "light";
     const device = read(KEYS.device);
     const right = read(KEYS.right);
+    // ?demo=1 (or ?demo=0) in the URL wins over what was saved, so a demo link always starts the way it says.
+    const param = new URLSearchParams(window.location.search).get("demo");
+    if (param === "1" || param === "0") write(KEYS.demo, param);
     set({
       theme,
       device: device === "tablet" || device === "mobile" ? device : "desktop",
       rightOpen: right === null ? true : right === "1",
+      demo: (param ?? read(KEYS.demo)) === "1",
     });
   },
 
@@ -80,6 +88,10 @@ export const useStudioStore = create<StudioState>((set) => ({
   setRightOpen: (rightOpen) => {
     write(KEYS.right, rightOpen ? "1" : "0");
     set({ rightOpen });
+  },
+  setDemo: (demo) => {
+    write(KEYS.demo, demo ? "1" : "0");
+    set({ demo });
   },
   setRightTab: (rightTab) => set({ rightTab }),
   setDraft: (draft) => set({ draft }),

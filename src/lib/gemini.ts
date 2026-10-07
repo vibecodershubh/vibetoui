@@ -47,6 +47,16 @@ export function redactSecrets(text: string): string {
 }
 
 const limits = new Map<string, number>();
+const LOOKUP_TIMEOUT_MS = 5_000;
+
+/** Rejects if `work` has not settled in `ms` (the timer is always cleared). */
+function withTimeout<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("timed out")), ms);
+  });
+  return Promise.race([work, timeout]).finally(() => clearTimeout(timer));
+}
 
 /**
  * `wanted` output tokens, capped at what the model allows (asking for more than the model's limit is a 400).
@@ -56,7 +66,7 @@ const limits = new Map<string, number>();
 export async function outputTokenBudget(model: string, wanted: number): Promise<number> {
   if (!limits.has(model)) {
     try {
-      const info = await getAi().models.get({ model });
+      const info = await withTimeout(getAi().models.get({ model }), LOOKUP_TIMEOUT_MS);
       limits.set(model, info.outputTokenLimit ?? Number.POSITIVE_INFINITY);
     } catch {
       limits.set(model, Number.POSITIVE_INFINITY);
