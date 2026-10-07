@@ -52,7 +52,9 @@ export const usePatchStore = create<PatchState>((set, get) => ({
 
       // The store applies it: replace this id only, refuse if it was locked while we waited, and push
       // the undo snapshot of the pre-patch canvas. Edits made in the meantime are never overwritten.
-      const result = useCanvasStore.getState().replaceComponent(componentId, data.component);
+      const type = target.type.replace(/[-_]+/g, " ").replace(/^./, (c) => c.toUpperCase());
+      const label = `Edited ${type}: “${text.length > 40 ? `${text.slice(0, 40)}…` : text}”`;
+      const result = useCanvasStore.getState().replaceComponent(componentId, data.component, label);
       if (!result.ok) {
         set({
           status: "idle",

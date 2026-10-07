@@ -76,7 +76,7 @@ describe("export document and studio data", () => {
     const ds = PRESETS[0].designSystem;
     const exported = buildDocument(components, ds, { frame: false });
     expect(exported).toContain("fonts.googleapis.com");
-    expect(exported).toContain("--bg:#FAF7F2");
+    expect(exported).toContain("--bg: #FAF7F2;");
     expect(exported).toContain("<h1>Hi</h1>");
     expect(exported).not.toMatch(/data-vui-id|alert\(1\)|vui-flash/);
 
@@ -87,7 +87,7 @@ describe("export document and studio data", () => {
   });
 
   it("has the three devices and four distinct example prompts", () => {
-    expect(DEVICES.map((d) => [d.id, d.width])).toEqual([["desktop", null], ["tablet", 768], ["mobile", 390]]);
+    expect(DEVICES.map((d) => [d.id, d.width])).toEqual([["desktop", 1280], ["tablet", 820], ["mobile", 390]]);
     expect(new Set(EXAMPLE_PROMPTS).size).toBe(4);
   });
 });

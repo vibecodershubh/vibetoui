@@ -38,7 +38,11 @@ export function CenterStage({ className = "" }: { className?: string }) {
         </div>
       )}
       {(stage === "generating" || stage === "ready") && (
-        <DeviceFrame>{stage === "generating" ? <PageSkeleton /> : <CanvasFrame className="h-full" />}</DeviceFrame>
+        <DeviceFrame>
+          {({ width, scale }) =>
+            stage === "generating" ? <PageSkeleton /> : <CanvasFrame className="h-full" width={width} scale={scale} />
+          }
+        </DeviceFrame>
       )}
     </main>
   );

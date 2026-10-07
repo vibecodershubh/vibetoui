@@ -30,6 +30,8 @@ interface StudioState {
   /** The visual direction preset: used for the next generation and shown in the top bar. */
   presetId: string;
   rightOpen: boolean;
+  /** The version-history drawer. */
+  historyOpen: boolean;
   rightTab: RightTab;
   /** The idea typed in the empty state (shared with the "Skip, just generate" button). */
   draft: string;
@@ -39,6 +41,7 @@ interface StudioState {
   setTheme: (theme: Theme) => void;
   setDevice: (device: DeviceId) => void;
   setRightOpen: (open: boolean) => void;
+  setHistoryOpen: (open: boolean) => void;
   setRightTab: (tab: RightTab) => void;
   setDraft: (draft: string) => void;
   /** Choose a direction. With `applyToPage`, the visible page is re-themed too (undoable). */
@@ -50,6 +53,7 @@ export const useStudioStore = create<StudioState>((set) => ({
   device: "desktop",
   presetId: DEFAULT_PRESET.id,
   rightOpen: true,
+  historyOpen: false,
   rightTab: "design",
   draft: "",
 
@@ -81,6 +85,7 @@ export const useStudioStore = create<StudioState>((set) => ({
     write(KEYS.right, rightOpen ? "1" : "0");
     set({ rightOpen });
   },
+  setHistoryOpen: (historyOpen) => set({ historyOpen }),
   setRightTab: (rightTab) => set({ rightTab }),
   setDraft: (draft) => set({ draft }),
 
@@ -90,7 +95,7 @@ export const useStudioStore = create<StudioState>((set) => ({
     set({ presetId: preset.id });
     if (opts?.applyToPage) {
       const { canvas, setCanvas } = useCanvasStore.getState();
-      setCanvas({ ...canvas, designSystem: preset.designSystem });
+      setCanvas({ ...canvas, designSystem: preset.designSystem }, `Direction: ${preset.name}`);
     }
   },
 }));

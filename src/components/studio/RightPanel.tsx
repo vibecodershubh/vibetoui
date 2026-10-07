@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   DENSITY_OPTIONS,
   RADIUS_OPTIONS,
@@ -11,11 +10,11 @@ import {
   type DensityId,
   type RadiusId,
 } from "@/lib/design-controls";
-import { PRESETS } from "@/lib/presets";
+import { PRESETS, presetOfDesignSystem } from "@/lib/presets";
 import { useCanvasStore } from "@/lib/store";
 import { useGenerateStore } from "@/store/generate";
 import { useStudioStore, type RightTab } from "@/store/studio";
-import { secondaryButton } from "./Popover";
+import { CodeView } from "./CodeView";
 import { Segmented } from "./Segmented";
 
 const TAB_OPTIONS: { value: RightTab; label: string }[] = [
@@ -32,10 +31,11 @@ function DesignTab() {
   const designSystem = useCanvasStore((s) => s.canvas.designSystem);
   const status = useGenerateStore((s) => s.status);
   const pageReady = status === "done" || status === "error";
+  const activeId = (pageReady ? presetOfDesignSystem(designSystem)?.id : undefined) ?? presetId;
 
-  const apply = (next: typeof designSystem) => {
+  const apply = (next: typeof designSystem, label: string) => {
     const { canvas, setCanvas } = useCanvasStore.getState();
-    setCanvas({ ...canvas, designSystem: next });
+    setCanvas({ ...canvas, designSystem: next }, label);
   };
   const swatches = Object.entries(designSystem.color);
 
@@ -49,10 +49,10 @@ function DesignTab() {
           <button
             key={p.id}
             type="button"
-            aria-pressed={p.id === presetId}
+            aria-pressed={p.id === activeId}
             onClick={() => setPreset(p.id, { applyToPage: pageReady })}
             className={`rounded-card border p-3 text-left transition-colors duration-150 ${
-              p.id === presetId ? "border-accent bg-accent-soft" : "border-line bg-panel hover:border-stone"
+              p.id === activeId ? "border-accent bg-accent-soft" : "border-line bg-panel hover:border-stone"
             }`}
           >
             <span className="flex items-center justify-between gap-3">
@@ -81,7 +81,7 @@ function DesignTab() {
             value={currentRadiusId(designSystem)}
             options={RADIUS_CHOICES}
             disabled={!pageReady}
-            onChange={(id: RadiusId) => apply(withRadius(designSystem, id))}
+            onChange={(id: RadiusId) => apply(withRadius(designSystem, id), `Corner radius: ${id}`)}
           />
         </div>
         <div className="grid gap-1.5">
@@ -91,7 +91,7 @@ function DesignTab() {
             value={currentDensityId(designSystem)}
             options={DENSITY_CHOICES}
             disabled={!pageReady}
-            onChange={(id: DensityId) => apply(withDensity(designSystem, id))}
+            onChange={(id: DensityId) => apply(withDensity(designSystem, id), `Density: ${id}`)}
           />
         </div>
         {!pageReady && <p className="text-xs text-stone">Generate a page to adjust radius and density.</p>}
@@ -121,55 +121,6 @@ function DesignTab() {
   );
 }
 
-function CodeTab() {
-  const components = useCanvasStore((s) => s.canvas.components);
-  const selectedId = useCanvasStore((s) => s.selectedId);
-  const status = useGenerateStore((s) => s.status);
-  const [note, setNote] = useState<string | null>(null);
-
-  if (status !== "done" && status !== "error") {
-    return <p className="text-sm text-stone">Nothing to show yet. Generate a page to see its code.</p>;
-  }
-  const selected = components.find((c) => c.id === selectedId);
-  const code = selected ? selected.html : components.map((c) => c.html).join("\n\n");
-
-  return (
-    <div className="grid gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-sm text-ink">{selected ? `Section: ${selected.id}` : "Whole page"}</span>
-        <div className="flex items-center gap-2">
-          <span role="status" className="text-xs text-stone">
-            {note}
-          </span>
-          <button
-            type="button"
-            className={secondaryButton}
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(code);
-                setNote("Copied");
-              } catch {
-                setNote("Copy blocked");
-              }
-              window.setTimeout(() => setNote(null), 2000);
-            }}
-          >
-            Copy
-          </button>
-        </div>
-      </div>
-      {!selected && <p className="text-xs text-stone">Select a section in the preview to see only its code.</p>}
-      <pre
-        tabIndex={0}
-        aria-label="HTML source"
-        className="max-h-[60vh] overflow-auto rounded-control border border-line bg-paper p-3 font-mono text-xs leading-relaxed text-ink"
-      >
-        <code>{code}</code>
-      </pre>
-    </div>
-  );
-}
-
 export function RightPanel() {
   const tab = useStudioStore((s) => s.rightTab);
   const setTab = useStudioStore((s) => s.setRightTab);
@@ -179,7 +130,7 @@ export function RightPanel() {
       <div className="mb-4">
         <Segmented label="Panel view" value={tab} options={TAB_OPTIONS} onChange={setTab} />
       </div>
-      {tab === "design" ? <DesignTab /> : <CodeTab />}
+      {tab === "design" ? <DesignTab /> : <CodeView />}
     </div>
   );
 }

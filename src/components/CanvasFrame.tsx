@@ -9,12 +9,44 @@ import { ComponentToolbar, type FrameRect } from "./ComponentToolbar";
 const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
 
 /** The sandboxed live preview. Fills its parent; the device frame around it decides the width. */
-export function CanvasFrame({ className = "", toolbar = true }: { className?: string; toolbar?: boolean }) {
+export function CanvasFrame({
+  className = "",
+  toolbar = true,
+  width,
+  scale = 1,
+}: {
+  className?: string;
+  toolbar?: boolean;
+  /** Lay the page out at this many CSS px (a device width). Omit to fill the parent. */
+  width?: number;
+  /** Scale the laid-out page down by this factor (so a 1280px layout fits a narrower stage). */
+  scale?: number;
+}) {
   const components = useCanvasStore((s) => s.canvas.components);
   const designSystem = useCanvasStore((s) => s.canvas.designSystem);
   const selectedId = useCanvasStore((s) => s.selectedId);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [rect, setRect] = useState<FrameRect | null>(null);
+
+  // The iframe is laid out at the device width and scaled down to fit; its height is enlarged by the same
+  // factor so, once scaled, it exactly fills the frame. Size changes animate.
+  const iframeStyle = {
+    width: width ? `${width}px` : "100%",
+    height: `${100 / scale}%`,
+    transform: scale === 1 ? undefined : `scale(${scale})`,
+    transformOrigin: "0 0",
+    transition: "transform 200ms ease, width 200ms ease, height 200ms ease",
+  };
+  // Positions reported by the frame are in its (unscaled) pixels; the toolbar lives in screen pixels.
+  const screenRect: FrameRect | null = rect && {
+    ...rect,
+    top: rect.top * scale,
+    left: rect.left * scale,
+    width: rect.width * scale,
+    height: rect.height * scale,
+    vw: rect.vw * scale,
+    vh: rect.vh * scale,
+  };
 
   // The frame is reloaded only when the STRUCTURE changes (design system, which sections exist, in what
   // order). A change to one section's html is swapped in place (see syncContent), so a scoped patch never
@@ -82,6 +114,8 @@ export function CanvasFrame({ className = "", toolbar = true }: { className?: st
         postState();
       } else if (data?.type === "select") {
         useCanvasStore.getState().selectComponent(typeof data.id === "string" ? data.id : null);
+      } else if (data?.type === "undo") {
+        useCanvasStore.getState().undo(); // Cmd/Ctrl+Z pressed while the preview has focus
       } else if (data?.type === "rect") {
         if (typeof data.id === "string" && [data.top, data.left, data.width, data.height, data.vw, data.vh].every(isNum)) {
           setRect({
@@ -103,15 +137,18 @@ export function CanvasFrame({ className = "", toolbar = true }: { className?: st
   }, [postState, syncContent]);
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative overflow-hidden ${className}`}>
       <iframe
         ref={iframeRef}
         title="Page preview"
         sandbox="allow-scripts"
         srcDoc={srcDoc}
-        className="h-full w-full bg-panel"
+        style={iframeStyle}
+        className="bg-panel"
       />
-      {toolbar && selectedId && rect && rect.id === selectedId && <ComponentToolbar key={rect.id} rect={rect} />}
+      {toolbar && selectedId && screenRect && screenRect.id === selectedId && (
+        <ComponentToolbar key={screenRect.id} rect={screenRect} />
+      )}
     </div>
   );
 }

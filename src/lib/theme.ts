@@ -11,7 +11,7 @@ export function fontsHref(ds: DesignSystem): string {
 }
 
 /** The design system as CSS variables on :root. Values are schema-validated before they get here. */
-export function designSystemCss(ds: DesignSystem): string {
+function cssVars(ds: DesignSystem): string[] {
   const { color: c, typography: t, spacing: s, radius: r, motion: m } = ds;
   // Native UI inside the page (scrollbars, form controls) should match a dark page.
   const [red, green, blue] = [1, 3, 5].map((i) => parseInt(c.bg.slice(i, i + 2), 16));
@@ -32,8 +32,22 @@ export function designSystemCss(ds: DesignSystem): string {
     `--heading-font:"${t.headingFont}",ui-sans-serif,system-ui,sans-serif`,
     `--body-font:"${t.bodyFont}",ui-sans-serif,system-ui,sans-serif`,
   ];
-  // rounded-full is built into Tailwind (not a theme value), so the pill ban is enforced here.
-  return `:root{${vars.join(";")}}.rounded-full{border-radius:var(--radius)!important}`;
+  // "name:value" declarations; the two builders below format them.
+  return vars;
+}
+
+/** Compact form, used inside the live preview. rounded-full is built into Tailwind (not a theme value), so the pill ban is enforced here. */
+export function designSystemCss(ds: DesignSystem): string {
+  return `:root{${cssVars(ds).join(";")}}.rounded-full{border-radius:var(--radius)!important}`;
+}
+
+/** Readable form (one declaration per line), used in the exported file. */
+export function designSystemCssPretty(ds: DesignSystem): string {
+  const lines = cssVars(ds).map((v) => {
+    const i = v.indexOf(":");
+    return `  ${v.slice(0, i)}: ${v.slice(i + 1)};`;
+  });
+  return `:root {\n${lines.join("\n")}\n}\n.rounded-full {\n  border-radius: var(--radius) !important;\n}`;
 }
 
 /**
